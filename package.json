@@ -15,14 +15,14 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "type-check": "tsc --noEmit",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+      "prettier --write",
+      "eslint --fix"
     ],
-    "src/**/*.{css,md}": [
+    "src/**/*.{css,md,json}": [
       "prettier --write"
     ]
   },
