@@ -15,7 +15,10 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "type-check": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "audit": "npm audit --audit-level=moderate",
+    "audit:fix": "npm audit fix",
+    "audit:production": "npm audit --production --audit-level=moderate"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
