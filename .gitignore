@@ -120,3 +120,5 @@ Thumbs.db
 
 # Storybook
 storybook-static/
+
+.vscode
