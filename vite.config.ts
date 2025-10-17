@@ -1,9 +1,9 @@
 // vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 // Use VITE_DEV_LAN_IP when present; fall back to localhost.
-const devHost = process.env.VITE_DEV_LAN_IP || "localhost";
+const devHost = process.env.VITE_DEV_LAN_IP || 'localhost';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -16,7 +16,7 @@ export default defineConfig({
     // Make the HMR client connect to your LAN IP instead of localhost
     hmr: {
       host: devHost, // e.g., 192.168.1.23
-      protocol: "ws",
+      protocol: 'ws',
       clientPort: 5173,
     },
   },
