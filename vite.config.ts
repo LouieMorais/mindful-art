@@ -2,22 +2,32 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Use VITE_DEV_LAN_IP when present; fall back to localhost.
 const devHost = process.env.VITE_DEV_LAN_IP || 'localhost';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
-    // Listen on all interfaces so the LAN IP works even when VPN is active
-    host: true, // equivalent to '0.0.0.0'
+    host: true,
     port: 5173,
     strictPort: true,
-    // Make the HMR client connect to your LAN IP instead of localhost
     hmr: {
-      host: devHost, // e.g., 192.168.1.23
+      host: devHost,
       protocol: 'ws',
       clientPort: 5173,
     },
-  },
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Content-Security-Policy': [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: https:",
+        "connect-src 'self' ws: wss: https://*.supabase.co",
+        "font-src 'self' data:",
+      ].join('; ')
+    }
+  }
 });
