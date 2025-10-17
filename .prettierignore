@@ -1,0 +1,17 @@
+# Build outputs
+dist
+build
+coverage
+
+# Dependencies
+node_modules
+
+# Environment files
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Git hooks
+.husky
