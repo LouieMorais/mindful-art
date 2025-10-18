@@ -1,38 +1,35 @@
 // src/components/search/SearchForm.tsx
-import { FormEvent } from 'react';
+import { useState } from 'react';
 
-interface Props {
-  value: string;
-  onChange: (v: string) => void;
-  onSubmit: () => void;
+interface SearchFormProps {
+  onSearch: (query: string) => void;
+  isLoading: boolean;
 }
 
-export default function SearchForm({ value, onChange, onSubmit }: Props) {
-  const handleSubmit = (e: FormEvent) => {
+export default function SearchForm({ onSearch, isLoading }: SearchFormProps) {
+  const [input, setInput] = useState('');
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    onSubmit();
-  };
+    onSearch(input);
+  }
 
   return (
-    <form onSubmit={handleSubmit} aria-labelledby="search-heading">
-      <h1 id="search-heading" style={{ fontSize: '1.5rem' }}>
-        Search artworks
-      </h1>
-      <label htmlFor="q">Keywords</label>
+    <form onSubmit={handleSubmit} aria-label="Artwork Search">
+      <label htmlFor="searchQuery">Keywords</label>
       <input
-        id="q"
-        name="q"
-        type="search"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="e.g., Rembrandt portrait"
-        aria-describedby="search-help"
-        style={{ display: 'block', width: '100%', maxWidth: 480, margin: '0.5rem 0' }}
+        id="searchQuery"
+        name="searchQuery"
+        type="text"
+        placeholder="What are you contemplating today?"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isLoading}
+        aria-required="true"
       />
-      <div id="search-help" style={{ fontSize: '0.9rem', color: '#666' }}>
-        Searches Rijksmuseum and Harvard Art Museums.
-      </div>
-      <button type="submit">Search</button>
+      <button type="submit" disabled={isLoading || !input.trim()}>
+        {isLoading ? 'Searching…' : 'Search for Art'}
+      </button>
     </form>
   );
 }

@@ -25,7 +25,7 @@ export default defineConfig({
         "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
         "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: https:",
-        "connect-src 'self' ws: wss: https://*.supabase.co",
+        "connect-src 'self' ws: wss: https://*.supabase.co https://www.rijksmuseum.nl https://api.harvardartmuseums.org",
         "font-src 'self' data:",
       ].join('; ')
     }

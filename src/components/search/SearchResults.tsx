@@ -1,56 +1,65 @@
 // src/components/search/SearchResults.tsx
 import type { Artwork } from '../../types/artwork';
-import { partitionByInstitution } from '../../services/searchPartition';
 import ArtworkSearchCard from './ArtworkSearchCard';
+import { INSTITUTIONS } from '../../config/institutions';
 
-interface Props {
-  items: Artwork[];
-  warnings: string[];
+interface SearchResultsProps {
+  query: string;
+  results: Record<string, Artwork[]>;
+  isLoading: boolean;
 }
 
-export default function SearchResults({ items, warnings }: Props) {
-  if (warnings.length > 0) {
-    // Non-fatal provider warnings (e.g., missing API keys)
-    // We surface them unobtrusively above results.
+export default function SearchResults({ query, results, isLoading }: SearchResultsProps) {
+  if (isLoading) return <p>Loading results…</p>;
+  if (!query) return null;
+
+  const total = Object.values(results)
+    .flat()
+    .filter((a) => a.imageUrl).length;
+
+  const allEmpty = total === 0;
+
+  if (allEmpty) {
     return (
-      <div>
-        <div role="note" style={{ padding: '0.5rem 0', color: '#8a6d3b' }}>
-          {warnings.map((w, i) => (
-            <div key={i}>Note: {w}</div>
-          ))}
-        </div>
-        <ResultsBody items={items} />
-      </div>
+      <section aria-labelledby="noResultsTitle">
+        <h2 id="noResultsTitle">No Art Found</h2>
+        <p>
+          We couldn’t locate artworks matching “{query}”. Try refining your keywords or exploring
+          different topics.
+        </p>
+      </section>
     );
   }
-  return <ResultsBody items={items} />;
-}
-
-function ResultsBody({ items }: { items: Artwork[] }) {
-  if (items.length === 0) {
-    return (
-      <p role="status" aria-live="polite" style={{ paddingTop: '1rem' }}>
-        No results.
-      </p>
-    );
-  }
-
-  const { byInstitution, institutions } = partitionByInstitution(items);
 
   return (
-    <div style={{ marginTop: '1rem' }}>
-      {institutions.map((inst) => (
-        <section key={inst} aria-labelledby={`inst-${inst}`}>
-          <h2 id={`inst-${inst}`} style={{ marginTop: '1rem' }}>
-            {inst}
-          </h2>
-          <div style={{ display: 'grid', gap: 12 }}>
-            {byInstitution[inst].map((it) => (
-              <ArtworkSearchCard key={`${it.source}:${it.id}`} item={it} />
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
+    <section aria-label="Search Results">
+      <h2>
+        {total} artwork{total === 1 ? '' : 's'} found for “{query}”
+      </h2>
+
+      {INSTITUTIONS.map((inst) => {
+        const items = (results[inst.id] ?? []).filter((a) => a.imageUrl);
+        if (!items.length) return null;
+
+        return (
+          <article key={inst.id} aria-labelledby={`heading-${inst.id}`}>
+            <h3 id={`heading-${inst.id}`}>
+              {inst.name} ({items.length})
+            </h3>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '1rem',
+              }}
+            >
+              {items.map((art) => (
+                <ArtworkSearchCard key={art.id} artwork={art} />
+              ))}
+            </div>
+          </article>
+        );
+      })}
+    </section>
   );
 }
