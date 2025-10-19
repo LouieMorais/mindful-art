@@ -1,24 +1,11 @@
-/** @type {import('jest').Config} */
 export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/src'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1',
-  },
-  globals: {
-    'import.meta': {
-      env: {
-        VITE_SUPABASE_URL: 'http://localhost:54321',
-        VITE_SUPABASE_ANON_KEY: 'test-anon-key',
-        VITE_HARVARD_API_KEY: 'test-harvard-key',
-        VITE_RIJKS_API_KEY: 'test-rijks-key',
-      },
-    },
   },
   transform: {
     '^.+\\.tsx?$': [
@@ -31,18 +18,34 @@ export default {
           module: 'esnext',
           moduleResolution: 'node',
         },
+        diagnostics: {
+          ignoreCodes: [1343, 2339],
+        },
       },
     ],
-    '^.+\\.[cm]?[jt]sx?$': 'babel-jest',
   },
-  transformIgnorePatterns: ['node_modules/(?!(uuid)/)'],
+  globals: {
+    'import.meta': {
+      env: {
+        VITE_SUPABASE_URL: 'https://test.supabase.co',
+        VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+        VITE_HARVARD_API_KEY: 'test-harvard-key',
+        VITE_RIJKS_API_KEY: 'test-rijks-key',
+      },
+    },
+  },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/main.tsx',
     '!src/vite-env.d.ts',
   ],
-  coverageThreshold: {
-    global: { branches: 0, functions: 0, lines: 0, statements: 0 },
+  coverageThresholds: {
+    global: {
+      branches: 50,
+      functions: 50,
+      lines: 50,
+      statements: 50,
+    },
   },
 };
