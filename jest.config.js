@@ -8,21 +8,18 @@ export default {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        tsconfig: {
-          jsx: 'react-jsx',
-          esModuleInterop: true,
-          allowSyntheticDefaultImports: true,
-          module: 'esnext',
-          moduleResolution: 'node',
-        },
-        diagnostics: {
-          ignoreCodes: [1343, 2339],
-        },
+    '^.+\\.tsx?$': ['ts-jest', {
+      tsconfig: {
+        jsx: 'react-jsx',
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        module: 'esnext',
+        moduleResolution: 'node',
       },
-    ],
+      diagnostics: {
+        ignoreCodes: [1343, 2339],
+      },
+    }],
   },
   globals: {
     'import.meta': {
