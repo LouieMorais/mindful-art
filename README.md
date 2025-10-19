@@ -1,4 +1,4 @@
-![](https://i.ibb.co/PskKYv93/mindful-art-topmastb-w.png)![](https://github.com/LouieMorais/mindful-art/blob/main/src/assets/forma_logo.svg?raw=true)
+![](https://github.com/LouieMorais/mindful-art/blob/main/src/assets/mindful_art_topmast.png?raw=true)
 
 # Mindful Art - Project Initiation Document - Release 01 (MVP)
 
