@@ -20,7 +20,7 @@ export default function GalleryPage() {
 
   return (
     <main>
-      <nav aria-label="Breadcrumb">
+      <nav className="breadcrumb" aria-label="Breadcrumb">
         <Link to="/galleries">← Your Galleries</Link>
       </nav>
 

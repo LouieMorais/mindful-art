@@ -8,8 +8,8 @@
 body {
   font-family: 'Onest', sans-serif;
   font-size: 1rem;
-  border: #111 1px solid;
-  border-radius: 0.5rem;
+  border: #8b8a8a 1px solid;
+  border-radius: 1.5rem;
   max-width: 1400px;
   min-height: 320px;
   align-items: center;
@@ -21,8 +21,17 @@ label {
   margin: 0 0 0.8rem 0;
 }
 input {
-  min-width: 50%;
-  height: 2rem;
+  min-width: 75%;
+  height: 2.6rem;
+  border: #4d4d4d 0.5px solid;
+  padding: 0 0.6rem;
+  border-radius: 0.5rem;
+  display: block;
+  margin: 0 0 0.8rem 0;
+}
+textarea {
+  min-width: 75%;
+  height: 25vh;
   border: #4d4d4d 0.5px solid;
   padding: 0 0.6rem;
   border-radius: 0.5rem;
@@ -34,7 +43,8 @@ input {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #ccc;
+  border: 1px solid #e4e4e4;
+  border-radius: 1rem;
   padding: 0.75rem 1rem;
   background: #fafafa;
 }
@@ -253,7 +263,6 @@ h6 {
 /* RESPONSIVE ADJUSTMENTS */
 @media (min-width: 960px) {
   .page--galleries {
-    padding-inline: 2rem;
   }
   .rail__item {
     width: 160px;
@@ -329,4 +338,12 @@ h6 {
   margin-left: 0.5rem;
   font-size: 0.85em;
   color: #333;
+}
+
+main {
+  padding: 0;
+  padding: 10px !important;
+}
+.breadcrumb {
+  padding: 0.6rem 0 0 0;
 }
