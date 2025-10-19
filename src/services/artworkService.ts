@@ -2,30 +2,63 @@
 import type { Artwork } from '../types/artwork';
 import { searchRijksmuseum } from './rijksmuseum';
 import { searchHarvard } from './harvard';
+import { logError, AppError } from '../utils/errorLogger';
 
 export interface SearchResult {
   items: Artwork[];
-  warnings: string[]; // provider-level warnings (e.g., missing API key)
+  warnings: string[];
+}
+
+export interface ProviderResult {
+  items: Artwork[];
+  warning?: string;
 }
 
 /**
- * Orchestrated search across providers.
- * - Runs providers concurrently.
- * - Flattens and returns all validated Artwork items.
- * - Collects provider warnings without failing the whole search.
+ * Orchestrated search across providers with comprehensive error handling
  */
 export async function searchArtworks(query: string, limitPerProvider = 24): Promise<SearchResult> {
-  const [rijks, harvard] = await Promise.all([
-    searchRijksmuseum(query, limitPerProvider),
-    searchHarvard(query, limitPerProvider),
+  if (!query || query.trim().length === 0) {
+    throw new AppError('Search query cannot be empty', 'INVALID_QUERY', {
+      action: 'searchArtworks',
+    });
+  }
+
+  const trimmedQuery = query.trim();
+  const warnings: string[] = [];
+  const allItems: Artwork[] = [];
+
+  // Run providers concurrently with individual error handling
+  const results = await Promise.allSettled([
+    searchRijksmuseum(trimmedQuery, limitPerProvider),
+    searchHarvard(trimmedQuery, limitPerProvider),
   ]);
 
-  const items: Artwork[] = [...rijks.items, ...harvard.items];
-  const warnings: string[] = [];
-  if (rijks.warning) warnings.push(rijks.warning);
-  if (harvard.warning) warnings.push(harvard.warning);
+  // Process results
+  results.forEach((result, index) => {
+    const providerName = index === 0 ? 'Rijksmuseum' : 'Harvard';
 
-  // Sort by title asc as a stable default; UI will group by institution later.
-  items.sort((a, b) => a.title.localeCompare(b.title));
-  return { items, warnings };
+    if (result.status === 'fulfilled') {
+      const { items, warning } = result.value;
+      allItems.push(...items);
+
+      if (warning) {
+        warnings.push(`${providerName}: ${warning}`);
+      }
+    } else {
+      // Log the error but don't fail the entire search
+      logError(result.reason, {
+        component: 'artworkService',
+        action: 'searchArtworks',
+        metadata: { provider: providerName, query: trimmedQuery },
+      });
+
+      warnings.push(`${providerName} is temporarily unavailable`);
+    }
+  });
+
+  // Sort by title for consistent ordering
+  allItems.sort((a, b) => a.title.localeCompare(b.title));
+
+  return { items: allItems, warnings };
 }

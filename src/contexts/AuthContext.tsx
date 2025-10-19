@@ -2,16 +2,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
+import { logError } from '../utils/errorLogger';
 import { AuthContext, type AuthState } from './auth-context';
 
-/**
- * AuthProvider (v0.5 stub):
- * - Reads current Supabase session on mount
- * - Subscribes to auth state changes
- * - Exposes { userId, isLoading } via AuthContext
- * NOTE: This file exports ONLY a React component to satisfy
- *       react-refresh/only-export-components.
- */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -19,23 +12,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    (async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (!isMounted) return;
+    // Get initial session
+    void (async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
 
-      if (error) {
+        if (!isMounted) return;
+
+        if (error) {
+          logError(error, { component: 'AuthContext', action: 'getSession' });
+          setUserId(null);
+        } else {
+          const session: Session | null = data?.session ?? null;
+          setUserId(session?.user?.id ?? null);
+        }
+      } catch (error) {
+        if (!isMounted) return;
+        logError(error, { component: 'AuthContext', action: 'getSession' });
         setUserId(null);
-      } else {
-        const session: Session | null = data?.session ?? null;
-        setUserId(session?.user?.id ?? null);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false);
-    })().catch(() => {
-      if (!isMounted) return;
-      setUserId(null);
-      setIsLoading(false);
-    });
+    })();
 
+    // Subscribe to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
