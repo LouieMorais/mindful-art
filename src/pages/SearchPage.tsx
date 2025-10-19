@@ -1,7 +1,7 @@
 // src/pages/SearchPage.tsx
 import { useState } from 'react';
 import SearchForm from '../components/search/SearchForm';
-import SearchResults from '../components/search/SearchResults';
+import ArtworkSearchCard from '../components/search/ArtworkSearchCard';
 import { searchArtworks } from '../services/artworkService';
 import type { Artwork } from '../types/artwork';
 
@@ -22,17 +22,13 @@ export default function SearchPage() {
     setError(null);
     try {
       const { items } = await searchArtworks(q);
-
-      // Group items by provider (exactly what the UI expects)
       const grouped: Grouped = { rijksmuseum: [], harvard: [] };
       for (const it of items) {
         if (it.source === 'rijksmuseum') grouped.rijksmuseum.push(it);
         else if (it.source === 'harvard') grouped.harvard.push(it);
       }
-
       setResults(grouped);
-    } catch (err) {
-      console.error('Search error', err);
+    } catch {
       setError('Something went wrong while searching. Please try again.');
       setResults({ rijksmuseum: [], harvard: [] });
     } finally {
@@ -40,8 +36,10 @@ export default function SearchPage() {
     }
   }
 
+  const allItems = [...results.rijksmuseum, ...results.harvard];
+
   return (
-    <main>
+    <main className="artsearchform">
       <h1>Search Artworks</h1>
       <SearchForm
         onSearch={(q) => {
@@ -49,10 +47,20 @@ export default function SearchPage() {
         }}
         isLoading={isLoading}
       />
-
       {error && <p role="alert">{error}</p>}
 
-      <SearchResults query={query} results={results} isLoading={isLoading} />
+      {query && !isLoading && (
+        <>
+          <h2 className="section-heading">
+            {allItems.length} artwork{allItems.length === 1 ? '' : 's'} found for “{query}”
+          </h2>
+          <div className="grid">
+            {allItems.map((art) => (
+              <ArtworkSearchCard key={`${art.source}:${art.id}`} artwork={art} />
+            ))}
+          </div>
+        </>
+      )}
     </main>
   );
 }

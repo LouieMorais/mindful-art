@@ -1,14 +1,15 @@
 // src/types/artwork.ts
 
 export type Institution = 'Rijksmuseum' | 'Harvard Art Museums';
-
 export interface Artwork {
-  id: string; // provider-stable id (string)
-  title: string; // safe text
-  artist: string; // safe text
-  date: string; // safe text
-  imageUrl: string | null; // absolute URL or null
-  objectUrl: string | null; // link to the object page on provider site
-  institution: Institution; // grouping key
+  id: string;
+  title: string;
+  artist: string;
+  date?: string; // free-text date (e.g., "c. 1650")
+  year?: string | number; // numeric or string year (if available)
+  imageUrl: string | null;
+  thumbnailUrl?: string;
+  objectUrl: string | null;
+  institution: Institution;
   source: 'rijksmuseum' | 'harvard';
 }
