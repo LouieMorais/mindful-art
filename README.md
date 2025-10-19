@@ -7,7 +7,8 @@
 **_Version 0.8_, 13/10/2025**
 **Product Manager:** Louie Morais
 
-![3-2-3-3-b-Gallery-Page-With-Artworks.png](https://i.ibb.co/wN4y9nkN/3-2-3-3-b-Gallery-Page-With-Artworks.png)
+[Design is representative of future releases, not current]
+![Gallery Page](https://i.ibb.co/jvKnCwbm/3-2-3-3-b-User-Area-Gallery-Page-With-Artworks.png)
 
 ---
 
