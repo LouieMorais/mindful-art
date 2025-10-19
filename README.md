@@ -8,7 +8,7 @@
 **Product Manager:** Louie Morais
 
 [Design is representative of future releases, not current]
-![Gallery Page](https://i.ibb.co/jvKnCwbm/3-2-3-3-b-User-Area-Gallery-Page-With-Artworks.png)
+![Gallery Page](/docs/wireframes/r01/3.2.3.4.b. User Area - Your Art Vault Page - With Artwork.png)
 
 ---
 
