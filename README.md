@@ -7,8 +7,9 @@
 **_Version 0.8_, 13/10/2025**
 **Product Manager:** Louie Morais
 
-[Design is representative of future releases, not current]
-![Gallery Page](/docs/wireframes/r01/3.2.3.4.b. User Area - Your Art Vault Page - With Artwork.png)
+Design is representative of future releases, not current MVP:
+
+![Gallery Page](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3.2.3.3.b.%20User%20Area%20-%20Gallery%20Page%20-%20With%20Artworks.png?raw=true)
 
 ---
 
