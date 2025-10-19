@@ -1,0 +1,4 @@
+/* src/styles/index.css */
+@import './cards.css'; /* components first */
+@import './modal.css'; /* components */
+@import './layout.css'; /* layout/base LAST so it can override component clashes */

@@ -1,0 +1,127 @@
+/* === STRUCTURAL CSS FOR "YOUR GALLERIES" PAGE === */
+/* No aesthetic styling, purely layout and spacing. */
+
+.page--galleries {
+  max-inline-size: 90rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  padding-block: 2rem;
+}
+
+/* HEADER REGION */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 2rem;
+  gap: 1rem;
+}
+
+.page-header__titles {
+  flex: 1 1 auto;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.page-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+}
+
+/* GALLERIES LIST CONTAINER */
+.galleries-list__items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* INDIVIDUAL GALLERY STRAP (STRUCTURE ONLY) */
+.gallery-strap {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.gallery-strap__header {
+  margin-block-end: 0.5rem;
+}
+
+.gallery-strap__title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.gallery-strap__meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+/* HORIZONTAL PREVIEW RAIL */
+.gallery-strap__rail {
+  overflow-x: auto;
+  padding-block: 0.5rem;
+}
+
+.rail {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+}
+
+.rail__item {
+  flex: 0 0 auto;
+  width: 120px;
+  aspect-ratio: 1 / 1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.rail__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.rail__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+/* EMPTY STATE */
+.galleries-empty {
+  text-align: center;
+  margin-block: 4rem;
+}
+
+.galleries-empty__lead {
+  margin-block: 1rem;
+  font-size: 1rem;
+}
+
+.galleries-empty__cta {
+  margin-block-start: 2rem;
+}
+
+/* RESPONSIVE ADJUSTMENTS */
+@media (min-width: 960px) {
+  .page--galleries {
+    padding-inline: 2rem;
+  }
+  .rail__item {
+    width: 160px;
+  }
+}

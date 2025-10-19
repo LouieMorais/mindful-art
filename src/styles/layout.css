@@ -1,0 +1,332 @@
+.onest-<uniquifier > {
+  font-family: 'Onest', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Onest', sans-serif;
+  font-size: 1rem;
+  border: #111 1px solid;
+  border-radius: 0.5rem;
+  max-width: 1400px;
+  min-height: 320px;
+  align-items: center;
+  padding: 20px;
+}
+label {
+  font-weight: 600;
+  display: block;
+  margin: 0 0 0.8rem 0;
+}
+input {
+  min-width: 50%;
+  height: 2rem;
+  border: #4d4d4d 0.5px solid;
+  padding: 0 0.6rem;
+  border-radius: 0.5rem;
+  display: block;
+  margin: 0 0 0.8rem 0;
+}
+/* Topmast */
+.topmast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #ccc;
+  padding: 0.75rem 1rem;
+  background: #fafafa;
+}
+
+.topmast__logo {
+  font-weight: 500;
+  font-size: 3rem;
+  text-decoration: none;
+  color: #111;
+}
+
+.topmast__list {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.topmast__link {
+  text-decoration: underline;
+}
+
+/* Section headings */
+.section-heading {
+  margin: 1rem 1rem 0.5rem;
+}
+
+/* Generic grid for cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* Buttons (neutral structural styles) */
+button {
+  border: 1px solid #bbb;
+  background: #f7f7f7;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-radius: 0.5rem;
+}
+
+.btn-primary {
+  border-color: #888;
+  background: #e9e9e9;
+}
+
+.btn-secondary {
+  border-color: #bbb;
+  background: #f2f2f2;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+/* Forms */
+.form label {
+  display: block;
+  margin-top: 0.5rem;
+}
+.form input,
+.form textarea {
+  width: 100%;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+h3 {
+  font-size: 1.52rem;
+  font-weight: 700;
+}
+h4 {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+h5 {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+h6 {
+  font-size: 1rem;
+}
+.artsearchform {
+  padding: 20px;
+}
+/* === STRUCTURAL CSS FOR "YOUR GALLERIES" PAGE === */
+/* No aesthetic styling, purely layout and spacing. */
+
+.page--galleries {
+  max-inline-size: 90rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  padding-block: 2rem;
+}
+
+/* HEADER REGION */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 2rem;
+  gap: 1rem;
+}
+
+.page-header__titles {
+  flex: 1 1 auto;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.page-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+}
+
+/* GALLERIES LIST CONTAINER */
+.galleries-list__items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* INDIVIDUAL GALLERY STRAP (STRUCTURE ONLY) */
+.gallery-strap {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.gallery-strap__header {
+  margin-block-end: 0.5rem;
+}
+
+.gallery-strap__title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.gallery-strap__meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+/* HORIZONTAL PREVIEW RAIL */
+.gallery-strap__rail {
+  overflow-x: auto;
+  padding-block: 0.5rem;
+}
+
+.rail {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+}
+
+.rail__item {
+  flex: 0 0 auto;
+  width: 120px;
+  aspect-ratio: 1 / 1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.rail__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.rail__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+/* EMPTY STATE */
+.galleries-empty {
+  text-align: center;
+  margin-block: 4rem;
+}
+
+.galleries-empty__lead {
+  margin-block: 1rem;
+  font-size: 1rem;
+}
+
+.galleries-empty__cta {
+  margin-block-start: 2rem;
+}
+
+/* RESPONSIVE ADJUSTMENTS */
+@media (min-width: 960px) {
+  .page--galleries {
+    padding-inline: 2rem;
+  }
+  .rail__item {
+    width: 160px;
+  }
+}
+
+/* Artwork search card */
+.art-card {
+  width: 220px;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  padding: 0.5rem;
+}
+
+.art-card__image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.art-card__placeholder {
+  width: 100%;
+  height: 220px;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.art-card__caption {
+  margin-top: 0.5rem;
+}
+
+.art-card__actions {
+  margin-top: 0.5rem;
+}
+/* Overlay + dialog (structural only) */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog {
+  background: #fff;
+  width: min(500px, 90vw);
+  padding: 1.25rem;
+  border-radius: 4px;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+/* Gallery list inside modal */
+.gallery-list {
+  list-style: none;
+  margin: 0.5rem 0 1rem;
+  padding: 0;
+}
+.gallery-list__item {
+  margin: 0.25rem 0;
+}
+.gallery-list__label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.badge {
+  margin-left: 0.5rem;
+  font-size: 0.85em;
+  color: #333;
+}
