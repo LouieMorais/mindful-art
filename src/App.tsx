@@ -1,16 +1,22 @@
 // src/App.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
+import AppShell from './components/layout/AppShell';
 import SearchPage from './pages/SearchPage';
+import YourGalleriesPage from './pages/YourGalleriesPage';
+import GalleryPage from './pages/GalleryPage';
+import CreateGalleryPage from './pages/_CreateGalleryPage';
+import './styles/layout.css';
 
 export default function App() {
   return (
     <Routes>
-      {/* No homepage yet: redirect root to /search */}
-      <Route path="/" element={<Navigate to="/search" replace />} />
-      <Route path="/search" element={<SearchPage />} />
-      {/* Keep room for future routes:
-         <Route path="/vault" element={<VaultPage />} />
-         <Route path="/profile" element={<ProfilePage />} /> */}
+      <Route element={<AppShell />}>
+        <Route path="/" element={<Navigate to="/search" replace />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/galleries" element={<YourGalleriesPage />} />
+        <Route path="/galleries/create" element={<CreateGalleryPage />} />
+        <Route path="/gallery/:id" element={<GalleryPage />} />
+      </Route>
     </Routes>
   );
 }
