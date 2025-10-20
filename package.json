@@ -14,10 +14,7 @@
     "test:coverage": "jest --coverage"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "git add"
-    ]
+    "*.{ts,tsx,js,jsx}": "eslint --fix"
   },
   "dependencies": {
     "plugin-react": "^0.0.1-security",
