@@ -129,3 +129,8 @@ storybook-static/
 .vscode
 .docs
 .trees
+node_modules
+dist
+coverage
+*.log
+.DS_Store
