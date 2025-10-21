@@ -1,6 +1,6 @@
 // src/services/harvard.ts
 import { z } from 'zod';
-import { sanitizeToPlainText, toSafeHttpUrl } from '../utils/sanitizeHtml';
+import { sanitiseToPlainText, toSafeHttpUrl } from '../utils/sanitiseHtml';
 import type { Artwork } from '../types/artwork';
 
 const HARVARD_KEY = import.meta.env.VITE_HARVARD_API_KEY as string | undefined;
@@ -58,9 +58,9 @@ export async function searchHarvard(
   const { records } = parsed.data;
 
   const items: Artwork[] = records.map((r) => {
-    const title = sanitizeToPlainText(r.title ?? '');
-    const artist = sanitizeToPlainText(r.people?.[0]?.name ?? '');
-    const date = sanitizeToPlainText(r.dated ?? '');
+    const title = sanitiseToPlainText(r.title ?? '');
+    const artist = sanitiseToPlainText(r.people?.[0]?.name ?? '');
+    const date = sanitiseToPlainText(r.dated ?? '');
     const imageUrl = toSafeHttpUrl(r.primaryimageurl ?? null);
     const objectUrl = toSafeHttpUrl(r.url ?? null);
     return {

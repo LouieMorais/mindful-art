@@ -1,6 +1,6 @@
 // src/services/rijksmuseum.ts
 import { z } from 'zod';
-import { sanitizeToPlainText, toSafeHttpUrl } from '../utils/sanitizeHtml';
+import { sanitiseToPlainText, toSafeHttpUrl } from '../utils/sanitiseHtml';
 import type { Artwork } from '../types/artwork';
 
 const RIJKS_KEY = import.meta.env.VITE_RIJKS_API_KEY as string | undefined;
@@ -73,8 +73,8 @@ export async function searchRijksmuseum(
   const items: Artwork[] = parsed.data.artObjects.map((o) => {
     // id: prefer `id`, fall back to `objectNumber`
     const stableId = (o.id ?? o.objectNumber ?? '').toString().trim();
-    const title = sanitizeToPlainText(o.title ?? '');
-    const artist = sanitizeToPlainText(o.principalOrFirstMaker ?? '');
+    const title = sanitiseToPlainText(o.title ?? '');
+    const artist = sanitiseToPlainText(o.principalOrFirstMaker ?? '');
 
     const imageUrl = toSafeHttpUrl(o.webImage?.url ?? null);
     const objectUrl = toSafeHttpUrl(o.links?.web ?? null);
