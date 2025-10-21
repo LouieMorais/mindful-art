@@ -2,10 +2,12 @@
 import { z } from 'zod';
 import { sanitiseToPlainText, toSafeHttpUrl } from '../utils/sanitiseHtml';
 import type { Artwork } from '../types/artwork';
+import type { ProviderResult } from './artworkService';
 
 const HARVARD_KEY = import.meta.env.VITE_HARVARD_API_KEY as string | undefined;
+const HARVARD_BASE_URL = 'https://api.harvardartmuseums.org/object';
+const REQUEST_TIMEOUT = 10000; // 10 seconds
 
-// Minimal fields to keep payload small
 const HarvardItemSchema = z.object({
   id: z.number(),
   title: z.string().optional().nullable(),
@@ -23,39 +25,37 @@ const HarvardResponseSchema = z.object({
   records: z.array(HarvardItemSchema),
 });
 
-export async function searchHarvard(
-  query: string,
-  limit = 24
-): Promise<{ items: Artwork[]; warning?: string }> {
+/**
+ * Search Harvard Art Museums with comprehensive error handling
+ */
+export async function searchHarvard(query: string, limit = 24): Promise<ProviderResult> {
   if (!HARVARD_KEY) {
     return {
       items: [],
-      warning: 'Harvard API key not configured (VITE_HARVARD_API_KEY); skipping provider.',
+      warning: 'Harvard API key not configured',
     };
   }
 
-  const q = encodeURIComponent(query);
-  const url =
-    `https://api.harvardartmuseums.org/object?apikey=${HARVARD_KEY}` +
-    `&q=${q}&size=${limit}&hasimage=1&fields=id,title,dated,primaryimageurl,url,people`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
-  const res = await fetch(url);
-  if (!res.ok) {
-    return { items: [], warning: `Harvard HTTP ${res.status}` };
-  }
+  try {
+    const q = encodeURIComponent(query);
+    const url =
+      `${HARVARD_BASE_URL}?apikey=${HARVARD_KEY}` +
+      `&q=${q}&size=${limit}&hasimage=1&fields=id,title,dated,primaryimageurl,url,people`;
 
-  // Fix: use explicit typing and safe narrowing
-  const rawJson: unknown = await res.json();
-  if (typeof rawJson !== 'object' || rawJson === null) {
-    return { items: [], warning: 'Harvard API returned non-object JSON' };
-  }
+    const response = await fetch(url, { signal: controller.signal });
 
-  const parsed = HarvardResponseSchema.safeParse(rawJson);
-  if (!parsed.success) {
-    return { items: [], warning: 'Harvard schema validation failed' };
-  }
+    if (!response.ok) {
+      throw new AppError(`Harvard API returned ${response.status}`, 'API_ERROR', {
+        component: 'harvard',
+        action: 'searchHarvard',
+        metadata: { status: response.status, query },
+      });
+    }
 
-  const { records } = parsed.data;
+    const rawJson: unknown = await response.json();
 
   const items: Artwork[] = records.map((r) => {
     const title = sanitiseToPlainText(r.title ?? '');
@@ -75,5 +75,53 @@ export async function searchHarvard(
     };
   });
 
-  return { items };
+    const { records } = parsed.data;
+
+    const items: Artwork[] = records
+      .map((record) => {
+        const title = sanitizeToPlainText(record.title ?? '');
+        const artist = sanitizeToPlainText(record.people?.[0]?.name ?? '');
+        const date = sanitizeToPlainText(record.dated ?? '');
+        const imageUrl = toSafeHttpUrl(record.primaryimageurl ?? null);
+        const objectUrl = toSafeHttpUrl(record.url ?? null);
+
+        return {
+          id: String(record.id),
+          title: title || 'Untitled',
+          artist: artist || 'Unknown',
+          date,
+          imageUrl,
+          objectUrl,
+          institution: 'Harvard Art Museums' as const,
+          source: 'harvard' as const,
+        };
+      })
+      .filter((item) => item.imageUrl !== null);
+
+    return { items };
+  } catch (error) {
+    if (error instanceof AppError) {
+      logError(error, error.context);
+      return { items: [], warning: error.message };
+    }
+
+    if ((error as Error).name === 'AbortError') {
+      logError(error, {
+        component: 'harvard',
+        action: 'searchHarvard',
+        metadata: { reason: 'timeout', query },
+      });
+      return { items: [], warning: 'Harvard request timed out' };
+    }
+
+    logError(error, {
+      component: 'harvard',
+      action: 'searchHarvard',
+      metadata: { query },
+    });
+
+    return { items: [], warning: 'Failed to search Harvard' };
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
