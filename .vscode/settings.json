@@ -19,5 +19,20 @@
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
-  "cSpell.words": ["nosniff", "supabase"]
+  "cSpell.words": [
+    "colour",
+    "eslintcache",
+    "njsproj",
+    "nosniff",
+    "ntvs",
+    "nvmrc",
+    "pipefail",
+    "SARIF",
+    "stylelintcache",
+    "supabase",
+    "unittests",
+    "vercel",
+    "vite",
+    "wireframes"
+  ]
 }
