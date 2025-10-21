@@ -5,22 +5,28 @@ import * as mod from '../sanitiseHtml';
  * Find a sanitiser function exported by the module, regardless of its name.
  * Priority: sanitiseHtml → sanitise → default (if function) → any function export.
  */
-function resolveSanitiser(m: Record<string, unknown>): (html: string) => string {
-  const candidate =
-    (m as any).sanitiseHtml ??
-    (m as any).sanitise ??
-    (typeof (m as any).default === 'function' ? (m as any).default : undefined) ??
-    Object.values(m).find((v) => typeof v === 'function');
+type SanitiserFn = (html: string) => string;
+function isFunction(value: unknown): value is SanitiserFn {
+  return typeof value === 'function';
+}
+
+function resolveSanitiser(m: Record<string, unknown>): SanitiserFn {
+  const candidate: SanitiserFn | undefined =
+    (isFunction(m['sanitiseHtml']) ? m['sanitiseHtml'] : undefined) ??
+    (isFunction(m['sanitise']) ? m['sanitise'] : undefined) ??
+    (isFunction(m['default']) ? m['default'] : undefined) ??
+    // Fall back to the first function export if none of the preferred names exist
+    (Object.values(m).find(isFunction) as SanitiserFn | undefined);
 
   if (typeof candidate !== 'function') {
     const keys = Object.keys(m).join(', ') || '(no exports found)';
     throw new Error(
       `sanitiseHtml test: could not find a sanitiser function export.\n` +
-      `Looked for: sanitiseHtml, sanitise, default, or any function.\n` +
-      `Module exports were: ${keys}`
+        `Looked for: sanitiseHtml, sanitise, default, or any function.\n` +
+        `Module exports were: ${keys}`,
     );
   }
-  return candidate as (html: string) => string;
+  return candidate;
 }
 
 const sanitise = resolveSanitiser(mod);
