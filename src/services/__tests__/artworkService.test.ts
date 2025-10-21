@@ -2,7 +2,7 @@
 import { searchArtworks } from '../artworkService';
 import type { Artwork } from '../../types/artwork';
 
-// Phase 2: controlled mocking of providers (no env, no network).
+// Controlled mocking of providers (no env, no network).
 jest.mock('../harvard', () => ({
   searchHarvard: jest.fn(),
 }));
@@ -16,14 +16,24 @@ import { searchRijksmuseum } from '../rijksmuseum';
 const mockedHarvard = searchHarvard as jest.MockedFunction<typeof searchHarvard>;
 const mockedRijks = searchRijksmuseum as jest.MockedFunction<typeof searchRijksmuseum>;
 
-describe('searchArtworks (Phase 2: provider contracts via controlled mocks)', () => {
+describe('searchArtworks — orchestrator behaviour', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
 
+  it('returns empty results and no warnings when providers return empty', async () => {
+    mockedHarvard.mockResolvedValueOnce({ items: [] });
+    mockedRijks.mockResolvedValueOnce({ items: [] });
+
+    const { items, warnings } = await searchArtworks('valid query', 5);
+
+    expect(items).toEqual<Artwork[]>([]);
+    expect(warnings).toEqual<string[]>([]);
+    expect(mockedHarvard).toHaveBeenCalledWith('valid query', 5);
+    expect(mockedRijks).toHaveBeenCalledWith('valid query', 5);
+  });
+
   it('flattens items and collects provider warnings (Harvard missing key)', async () => {
-    // Exact warning from the codebase:
-    // 'Harvard API key not configured (VITE_HARVARD_API_KEY); skipping provider.'
     mockedHarvard.mockResolvedValueOnce({
       items: [],
       warning: 'Harvard API key not configured (VITE_HARVARD_API_KEY); skipping provider.',
@@ -45,15 +55,10 @@ describe('searchArtworks (Phase 2: provider contracts via controlled mocks)', ()
 
     const { items, warnings } = await searchArtworks('Rembrandt', 5);
 
-    // Items are concatenated and sorted by title inside the orchestrator.
     expect(items).toEqual(rijksItems);
-
-    // Warning from Harvard is preserved and surfaced.
     expect(warnings).toEqual([
       'Harvard API key not configured (VITE_HARVARD_API_KEY); skipping provider.',
     ]);
-
-    // Providers were called once with our query/limit.
     expect(mockedRijks).toHaveBeenCalledWith('Rembrandt', 5);
     expect(mockedHarvard).toHaveBeenCalledWith('Rembrandt', 5);
   });
@@ -113,8 +118,7 @@ describe('searchArtworks (Phase 2: provider contracts via controlled mocks)', ()
 
     const { items, warnings } = await searchArtworks('anything', 2);
 
-    // Sorted by title asc: Alpha, Zeta
-    expect(items.map(i => i.title)).toEqual(['Alpha', 'Zeta']);
-    expect(warnings).toEqual([]); // no warnings returned in this case
+    expect(items.map(i => i.title)).toEqual(['Alpha', 'Zeta']); // ASC by title
+    expect(warnings).toEqual([]); // none returned here
   });
 });
