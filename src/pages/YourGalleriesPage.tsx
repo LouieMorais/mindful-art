@@ -1,5 +1,6 @@
 // src/pages/YourGalleriesPage.tsx
 import { Link } from 'react-router-dom';
+import { SafeImage } from '../components/SafeImage';
 import { useGalleryStore } from '../store/galleryStore';
 
 export default function YourGalleriesPage() {
@@ -71,11 +72,15 @@ export default function YourGalleriesPage() {
                         {artworks.slice(0, 12).map((a) => (
                           <li key={a.id} className="rail__item">
                             {a.imageUrl ? (
-                              <img
+                              <SafeImage
                                 className="rail__image"
                                 src={a.imageUrl}
                                 alt={`${a.title} — ${a.artist}`}
                                 loading="lazy"
+                                decoding="async"
+                                /* Optionally restrict to known hosts:
+                                  allowHosts={['cdn.your-domain.example']}
+                                  If you store relative paths, omit allowHosts. */
                               />
                             ) : (
                               <div className="rail__placeholder" aria-label="No image available" />

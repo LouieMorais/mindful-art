@@ -1,5 +1,6 @@
 // src/pages/GalleryPage.tsx
 import { useParams, Link } from 'react-router-dom';
+import { SafeImage } from '../components/SafeImage';
 import { useGalleryStore } from '../store/galleryStore';
 
 export default function GalleryPage() {
@@ -52,11 +53,15 @@ export default function GalleryPage() {
             {gallery.artworks.map((a) => (
               <li key={a.id}>
                 {a.imageUrl ? (
-                  <img
+                  <SafeImage
                     src={a.imageUrl}
                     alt={`${a.title} — ${a.artist}`}
                     width={240}
-                    height="auto"
+                    style={{ height: 'auto' }}
+                    loading="lazy"
+                    decoding="async"
+                    /* optionally restrict to known hosts:
+                       allowHosts={['cdn.your-domain.example']} */
                   />
                 ) : (
                   <div style={{ width: 240, height: 240 }} aria-label="No image available" />
