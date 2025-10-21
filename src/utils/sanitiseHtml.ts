@@ -1,4 +1,4 @@
-// src/utils/sanitizeHtml.ts
+// src/utils/sanitiseHtml.ts
 /**
  * Tiny, conservative sanitiser for untrusted text:
  * - strips any angle-bracketed tags
@@ -7,7 +7,7 @@
  * React already escapes text nodes, so we never use innerHTML.
  * This utility ensures we don't accidentally render any HTML tags we get from APIs.
  */
-export function sanitizeToPlainText(input: unknown): string {
+export function sanitiseToPlainText(input: unknown): string {
   if (typeof input !== 'string') return '';
   // Remove angle-bracketed sequences
   const noTags = input.replace(/<[^>]*>/g, '');
