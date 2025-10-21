@@ -134,3 +134,4 @@ dist
 coverage
 *.log
 .DS_Store
+*.mjs
