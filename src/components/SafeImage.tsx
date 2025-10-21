@@ -1,46 +1,62 @@
 // src/components/SafeImage.tsx
-import type { ImgHTMLAttributes } from 'react';
+import React from 'react';
 
-type SafeImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
-  src?: string | null | undefined;
-  /** Optional list of allowed hostnames, e.g. ['cdn.example.com'] */
+type SafeImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
+  /** Restrict remote hosts, if you implement CSP/URL checks later. */
   allowHosts?: string[];
 };
 
-/** Exported for unit tests if you wish to add them later */
-export function isSafeImageUrl(raw: unknown, allowHosts?: string[]): raw is string {
-  if (typeof raw !== 'string' || raw.trim() === '') return false;
-
-  try {
-    // Use window origin when available; fall back to http://localhost for SSR/tests
-    const base =
-      typeof window !== 'undefined' && window.location?.origin
-        ? window.location.origin
-        : 'http://localhost';
-    const url = new URL(raw, base);
-
-    // 1) Protocol allowlist
-    if (!['http:', 'https:'].includes(url.protocol)) return false;
-
-    // 2) Disallow embedded credentials
-    if (url.username || url.password) return false;
-
-    // 3) Optional host allowlist
-    if (Array.isArray(allowHosts) && allowHosts.length > 0) {
-      if (!allowHosts.includes(url.hostname)) return false;
+/**
+ * SafeImage
+ * Lightweight wrapper around <img/> to centralise defaults and
+ * future guardrails (e.g., allowlist, referrerPolicy).
+ *
+ * NOTE: Keep styling minimal; callers pass width/height/sizes as needed.
+ */
+export function SafeImage({
+  src,
+  alt,
+  loading = 'lazy',
+  decoding = 'async',
+  referrerPolicy = 'no-referrer',
+  allowHosts,
+  ...rest
+}: SafeImageProps) {
+  // Optional host allow-list hook (no-op by default)
+  if (src && allowHosts && allowHosts.length > 0) {
+    try {
+      const host = new URL(String(src)).host;
+      if (!allowHosts.includes(host)) {
+        // Block rendering if host is not permitted
+        // (Prefer a telemetry/log hook in real usage)
+        return (
+          <div
+            role="img"
+            aria-label="Image blocked by policy"
+            style={{ width: rest.width ?? 240, height: rest.height ?? 'auto' }}
+          />
+        );
+      }
+    } catch {
+      // If URL parsing fails, render a placeholder for safety
+      return (
+        <div
+          role="img"
+          aria-label="Invalid image URL"
+          style={{ width: rest.width ?? 240, height: rest.height ?? 'auto' }}
+        />
+      );
     }
-
-    // 4) Guard absurd URL length
-    if (raw.length > 2048) return false;
-
-    return true;
-  } catch {
-    return false;
   }
-}
 
-export function SafeImage({ src, allowHosts, alt = '', ...rest }: SafeImageProps) {
-  const ok = isSafeImageUrl(src, allowHosts);
-  // If invalid, render without src (or swap to a local placeholder if you prefer)
-  return <img src={ok ? (src as string) : undefined} alt={alt} {...rest} />;
+  return (
+    <img
+      src={src as string | undefined}
+      alt={alt}
+      loading={loading}
+      decoding={decoding}
+      referrerPolicy={referrerPolicy}
+      {...rest}
+    />
+  );
 }
