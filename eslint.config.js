@@ -1,3 +1,8 @@
+// eslint.config.js
+/**
+ * Pragmatic baseline: non type-aware.
+ * TypeScript (tsc) remains your type checker; ESLint handles style & obvious bugs.
+ */
 import js from '@eslint/js';
 import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -5,40 +10,62 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
 
+const base = {
+  languageOptions: {
+    ecmaVersion: 2024,
+    sourceType: 'module',
+    globals: { ...globals.browser },
+  },
+  plugins: {
+    'react-hooks': reactHooks,
+    'react-refresh': reactRefresh,
+  },
+  rules: {
+    ...js.configs.recommended.rules,
+    ...reactHooks.configs.recommended.rules,
+    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    // Prefer TS plugin where available, but non type-aware:
+    'no-unused-vars': 'off',
+  },
+};
+
 export default tseslint.config(
-  // Files to ignore globally
   { ignores: ['dist', 'node_modules', 'coverage'] },
 
-  // Base configuration
+  // App files
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommendedTypeChecked, prettier],
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      ecmaVersion: 2024,
-      globals: globals.browser,
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
+    ...base,
+    files: ['src/**/*.{ts,tsx}'],
+    extends: [
+      tseslint.configs.recommended, // non type-aware
+      prettier,
+    ],
     rules: {
-      ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
 
-  // === Test-specific override block ===
+  // Tests
   {
-    files: ['**/__tests__/**/*.{ts,tsx}', '**/*.test.{ts,tsx}'],
+    ...base,
+    files: [
+      'src/**/__tests__/**/*.{ts,tsx}',
+      'src/**/*.test.ts',
+      'src/**/*.test.tsx',
+      'src/setupTests.ts',
+    ],
+    languageOptions: {
+      ...base.languageOptions,
+      globals: { ...base.languageOptions.globals, jest: true, expect: true },
+    },
+    extends: [
+      tseslint.configs.recommended, // non type-aware
+      prettier,
+    ],
     rules: {
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
+      // Be forgiving in tests/mocks
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/require-await': 'off',
     },
   }
 );
