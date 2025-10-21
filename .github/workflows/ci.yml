@@ -25,8 +25,17 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
 
+      # ---- SAFE INSTALL SECTION ----
+      # If this is a PR from a fork, run a safer install that ignores lifecycle scripts.
+      - name: Install dependencies (safe mode for forks)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork }}
+        run: npm ci --ignore-scripts
+
+      # Otherwise, for trusted pushes/branches, run a normal install.
       - name: Install dependencies
+        if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
         run: npm ci
+      # ---- END SAFE INSTALL SECTION ----
 
       - name: Run linter
         run: npm run lint

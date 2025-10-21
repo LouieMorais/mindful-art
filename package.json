@@ -20,7 +20,6 @@
     "*.{ts,tsx,js,jsx}": "eslint --fix"
   },
   "dependencies": {
-    "plugin-react": "^0.0.1-security",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript-eslint": "^8.46.1"

@@ -29,29 +29,101 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Allow the job to continue so the "Create issue" step can run conditionally
-      - name: Run npm audit
-        run: npm audit --audit-level=moderate
+      # --- Snyk: run only on weekly schedule or manual dispatch ---
+      - name: Install Snyk CLI
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        run: npm install -g snyk@latest
+
+      # Runs Snyk test, generates both JSON and SARIF outputs.
+      # Snyk exits non-zero on issues at/above the threshold; we keep the job alive for reporting.
+      - id: snyk_test
+        name: Snyk test (high & critical)
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        shell: bash
+        run: |
+          set -o pipefail
+          snyk test --severity-threshold=high --json-file-output=snyk.json | tee snyk.out
+          snyk test --severity-threshold=high --sarif-file-output=snyk.sarif || true
+
+      # Persist Snyk outputs for later review (only if Snyk found issues / step failed)
+      - name: Upload Snyk artifacts
+        if: ${{ steps.snyk_test.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-report
+          path: |
+            snyk.json
+            snyk.sarif
+            snyk.out
+
+      # Optional: send findings to GitHub Code Scanning (Security tab)
+      - name: Upload Snyk SARIF to Code Scanning
+        if: ${{ steps.snyk_test.outcome == 'failure' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+
+      # Record the project in Snyk so the dashboard updates (monitor does not count against pushes)
+      - name: Snyk monitor (record snapshot)
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk monitor
+
+      # Run audit, capture output, and propagate the audit's exit code despite the pipe.
+      # continue-on-error keeps the job alive so subsequent conditional steps can run.
+      - id: audit
+        name: Run npm audit (capture)
+        shell: bash
+        run: |
+          set -o pipefail
+          npm audit --audit-level=moderate | tee audit.txt
         continue-on-error: true
+
+      # Optional: only upload the report if the audit actually failed
+      - name: Upload audit report
+        if: ${{ steps.audit.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: audit.txt
 
       - name: Check for outdated packages
         run: npm outdated || true
 
-      # Run only if some previous step failed (i.e., audit found issues)
-      - name: Create issue if vulnerabilities found
-        if: ${{ failure() }}
+      # Create or update the tracking issue ONLY if the audit step failed
+      - name: Upsert tracking issue if vulnerabilities found
+        if: ${{ steps.audit.outcome == 'failure' }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ github.token }}
           script: |
             const title = '🚨 Security vulnerabilities detected';
-            const body =
-              'Automated security scan found vulnerabilities. Please review and update dependencies.\n\n' +
-              'Run `npm audit` locally for details.';
-            await github.rest.issues.create({
+            const body = 'Automated security scan found vulnerabilities. See the attached run artefact `audit-report` for details. Run `npm audit` locally for remediation.';
+            const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title,
-              body,
-              labels: ['security', 'dependencies']
+              state: 'open',
+              labels: 'security'
             });
+            const existing = issues.find(i => i.title === title);
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body
+              });
+              core.info(`Updated issue #${existing.number}`);
+            } else {
+              const { data: created } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['security','dependencies']
+              });
+              core.info(`Created issue #${created.number}`);
+            }
