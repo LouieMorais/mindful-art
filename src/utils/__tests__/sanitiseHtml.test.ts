@@ -23,7 +23,7 @@ function resolveSanitiser(m: Record<string, unknown>): SanitiserFn {
     throw new Error(
       `sanitiseHtml test: could not find a sanitiser function export.\n` +
         `Looked for: sanitiseHtml, sanitise, default, or any function.\n` +
-        `Module exports were: ${keys}`,
+        `Module exports were: ${keys}`
     );
   }
   return candidate;
@@ -49,9 +49,7 @@ describe('sanitiseHtml (Phase 3: pure utility, deterministic)', () => {
   });
 
   it('removes dangerous event handlers and javascript: URLs', () => {
-    const input =
-      `<img src="x" onerror="alert(1)">` +
-      `<a href="javascript:alert(2)">click</a>`;
+    const input = `<img src="x" onerror="alert(1)">` + `<a href="javascript:alert(2)">click</a>`;
     const out = sanitise(input);
 
     expect(out.toLowerCase()).not.toContain('onerror');

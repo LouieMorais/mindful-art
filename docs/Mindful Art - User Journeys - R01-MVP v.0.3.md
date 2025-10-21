@@ -353,18 +353,16 @@ Displays all information provided in registration as read-only:
 
 Straps work as stand-alone tasters of galleries hosting Artwork Cards or, as in the case of the Vault Strap, they work as a "basket" previewing items for later curation.
 
-
-
-|                                                        | 3.2.5.1. Vault Strap                                        | 3.2.5.2. Gallery Strap                                       |
-| ------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------------------------ |
+|                                                        | 3.2.5.1. Vault Strap                                        | 3.2.5.2. Gallery Strap                                          |
+| ------------------------------------------------------ | ----------------------------------------------------------- | --------------------------------------------------------------- |
 | Card Type hosted                                       | [3.2.6.2. Vault Strap Card](#3262-artwork-vault-strap-card) | [3.2.6.4. Gallery Strap Card](#3264-artwork-gallery-strap-card) |
-| Appears in page                                        | Search Page                                                 | Your Gallery page                                            |
-| Sorted by                                              | Last saved first                                            | User order/ last saved first                                 |
-| Linked title to artwork listing page                   | ✅                                                           | ✅                                                            |
-| ~~Linked CTA/icon to artwork listing page~~ - post-MVP | ✅                                                           | ✅                                                            |
-| Number of artworks                                     | ✅                                                           | ✅                                                            |
-| ~~Navigational controls (previous/next)~~ - post-MVP   | ✅                                                           | ✅                                                            |
-| Collapse/Expand control                                | ✅                                                           |                                                              |
+| Appears in page                                        | Search Page                                                 | Your Gallery page                                               |
+| Sorted by                                              | Last saved first                                            | User order/ last saved first                                    |
+| Linked title to artwork listing page                   | ✅                                                          | ✅                                                              |
+| ~~Linked CTA/icon to artwork listing page~~ - post-MVP | ✅                                                          | ✅                                                              |
+| Number of artworks                                     | ✅                                                          | ✅                                                              |
+| ~~Navigational controls (previous/next)~~ - post-MVP   | ✅                                                          | ✅                                                              |
+| Collapse/Expand control                                | ✅                                                          |                                                                 |
 
 <a href="#mindful-art---project-initiation-document---release-01-mvp" style="float: right; font-size: 0.8em; display: block; padding: 10px 0;  clear: both">**[BACK TO INDEX]**</a>
 

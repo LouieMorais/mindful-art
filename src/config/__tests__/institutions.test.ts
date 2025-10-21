@@ -7,7 +7,7 @@ type ConfigInstitution = { id: string; name: string };
 
 // Compile-time assertion: ensure INSTITUTIONS is an array of {id,name}.
 // This uses the type alias so it is not "defined but never used", and has zero runtime effect.
-(INSTITUTIONS satisfies readonly ConfigInstitution[]);
+INSTITUTIONS satisfies readonly ConfigInstitution[];
 
 describe('institutions config', () => {
   it('exports a non-empty array of {id,name} objects', () => {
@@ -31,13 +31,13 @@ describe('institutions config', () => {
   });
 
   it('has stable, unique ids and no duplicates', () => {
-    const ids = INSTITUTIONS.map(i => i.id);
+    const ids = INSTITUTIONS.map((i) => i.id);
     const unique = new Set(ids);
     expect(unique.size).toBe(ids.length);
   });
 
   it('maps ids to the correct display names', () => {
-    const map = Object.fromEntries(INSTITUTIONS.map(i => [i.id, i.name]));
+    const map = Object.fromEntries(INSTITUTIONS.map((i) => [i.id, i.name]));
     expect(map['rijksmuseum']).toBe('Rijksmuseum');
     expect(map['harvard']).toBe('Harvard Art Museums');
   });

@@ -107,7 +107,7 @@ export async function searchHarvard(term: string, limit = 25): Promise<Artwork[]
   if (!q) return [];
 
   const url = `https://api.harvardartmuseums.org/object?apikey=${encodeURIComponent(
-    key,
+    key
   )}&q=${encodeURIComponent(q)}&size=${limit}&hasimage=1`;
 
   const res = await fetch(url);
@@ -146,7 +146,7 @@ export async function searchHarvard(term: string, limit = 25): Promise<Artwork[]
         thumbUrl: String(img),
         fullUrl: String(img),
         sourceUrl: String(
-          r?.url || `https://harvardartmuseums.org/collections/object/${r.objectid ?? ''}`,
+          r?.url || `https://harvardartmuseums.org/collections/object/${r.objectid ?? ''}`
         ),
         rights: r?.copyright || r?.creditline || undefined,
       } as Artwork;

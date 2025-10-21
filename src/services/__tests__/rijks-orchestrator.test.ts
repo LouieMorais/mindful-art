@@ -77,7 +77,7 @@ describe('searchArtworks — Rijksmuseum behaviours (Phase 2, orchestrator-level
 
     const { items, warnings } = await searchArtworks('rate', 5);
 
-    expect(items.map(i => i.id)).toEqual(['h2']);
+    expect(items.map((i) => i.id)).toEqual(['h2']);
     expect(warnings).toEqual(['Rijksmuseum HTTP 429']);
   });
 
@@ -104,7 +104,7 @@ describe('searchArtworks — Rijksmuseum behaviours (Phase 2, orchestrator-level
 
     const { items, warnings } = await searchArtworks('schema', 2);
 
-    expect(items.map(i => i.title)).toEqual(['Sorted Alpha']);
+    expect(items.map((i) => i.title)).toEqual(['Sorted Alpha']);
     expect(warnings).toEqual(['Rijksmuseum schema validation failed']);
   });
 });

@@ -27,7 +27,7 @@ export default defineConfig({
         "img-src 'self' data: https:",
         "connect-src 'self' ws: wss: https://*.supabase.co https:",
         "font-src 'self' data: https://fonts.gstatic.com",
-      ].join('; ')
-    }
-  }
+      ].join('; '),
+    },
+  },
 });

@@ -104,7 +104,7 @@ export async function searchSmithsonian(term: string, limit = 10): Promise<Artwo
 
   // Step 1: Search Smithsonian with filter for image media
   const searchUrl = `https://api.si.edu/openaccess/api/v1.0/search?q=${encodeURIComponent(
-    `${q} AND online_media_type:"Images"`,
+    `${q} AND online_media_type:"Images"`
   )}&rows=${limit}&api_key=${encodeURIComponent(key)}`;
 
   const searchRes = await fetch(searchUrl);
@@ -118,7 +118,7 @@ export async function searchSmithsonian(term: string, limit = 10): Promise<Artwo
     if (!id) return null;
     try {
       const contentUrl = `https://api.si.edu/openaccess/api/v1.0/content/${encodeURIComponent(
-        id,
+        id
       )}?api_key=${encodeURIComponent(key)}`;
       const contentRes = await fetch(contentUrl);
       if (!contentRes.ok) return null;

@@ -82,7 +82,7 @@ describe('searchArtworks — orchestrator behaviour', () => {
 
     const { items, warnings } = await searchArtworks('Monet', 3);
 
-    expect(items.map(i => i.id)).toEqual(['r2']);
+    expect(items.map((i) => i.id)).toEqual(['r2']);
     expect(warnings).toEqual(['Harvard HTTP 500']);
   });
 
@@ -118,7 +118,7 @@ describe('searchArtworks — orchestrator behaviour', () => {
 
     const { items, warnings } = await searchArtworks('anything', 2);
 
-    expect(items.map(i => i.title)).toEqual(['Alpha', 'Zeta']); // ASC by title
+    expect(items.map((i) => i.title)).toEqual(['Alpha', 'Zeta']); // ASC by title
     expect(warnings).toEqual([]); // none returned here
   });
 });

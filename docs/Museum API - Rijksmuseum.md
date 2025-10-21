@@ -101,7 +101,7 @@ export async function searchRijks(term: string, limit = 25): Promise<Artwork[]> 
 
   // ps = page size; imgonly=true ensures images are available
   const url = `https://www.rijksmuseum.nl/api/en/collection?key=${encodeURIComponent(
-    key,
+    key
   )}&q=${encodeURIComponent(q)}&imgonly=true&ps=${limit}`;
 
   const res = await fetch(url);
@@ -120,7 +120,7 @@ export async function searchRijks(term: string, limit = 25): Promise<Artwork[]> 
       thumbUrl: String(o.webImage.url),
       fullUrl: String(o.webImage.url), // good enough for demo; I can switch to IIIF variants later
       sourceUrl: String(
-        o?.links?.web ?? `https://www.rijksmuseum.nl/en/collection/${o?.objectNumber}`,
+        o?.links?.web ?? `https://www.rijksmuseum.nl/en/collection/${o?.objectNumber}`
       ),
       rights: o?.copyright ? String(o.copyright) : undefined,
     }));
