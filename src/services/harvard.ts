@@ -6,20 +6,31 @@ import type { Artwork } from '../types/artwork';
 const HARVARD_KEY = import.meta.env.VITE_HARVARD_API_KEY as string | undefined;
 
 // Minimal fields to keep payload small
+const HarvardImageSchema = z.object({
+  baseimageurl: z.string().optional().nullable(), // do URL safety separately
+  iiifbaseuri: z.string().optional().nullable(),
+});
+
 const HarvardItemSchema = z.object({
   id: z.number(),
   title: z.string().optional().nullable(),
   dated: z.string().optional().nullable(),
-  primaryimageurl: z.string().url().optional().nullable(),
-  url: z.string().url().optional().nullable(),
+  url: z.string().optional().nullable(),
   people: z
     .array(z.object({ name: z.string().optional().nullable() }))
     .optional()
     .nullable(),
+  primaryimageurl: z.string().optional().nullable(),
+  images: z.array(HarvardImageSchema).optional().nullable(),
 });
 
 const HarvardResponseSchema = z.object({
-  info: z.object({ totalrecordsperquery: z.number().optional() }).optional().nullable(),
+  info: z
+    .object({
+      totalrecords: z.number().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
   records: z.array(HarvardItemSchema),
 });
 
@@ -37,14 +48,14 @@ export async function searchHarvard(
   const q = encodeURIComponent(query);
   const url =
     `https://api.harvardartmuseums.org/object?apikey=${HARVARD_KEY}` +
-    `&q=${q}&size=${limit}&hasimage=1&fields=id,title,dated,primaryimageurl,url,people`;
+    `&q=${q}&size=${limit}&hasimage=1` +
+    `&fields=id,title,dated,primaryimageurl,url,people,images.baseimageurl,images.iiifbaseuri`;
 
   const res = await fetch(url);
   if (!res.ok) {
     return { items: [], warning: `Harvard HTTP ${res.status}` };
   }
 
-  // Fix: use explicit typing and safe narrowing
   const rawJson: unknown = await res.json();
   if (typeof rawJson !== 'object' || rawJson === null) {
     return { items: [], warning: 'Harvard API returned non-object JSON' };
@@ -61,14 +72,26 @@ export async function searchHarvard(
     const title = sanitiseToPlainText(r.title ?? '');
     const artist = sanitiseToPlainText(r.people?.[0]?.name ?? '');
     const date = sanitiseToPlainText(r.dated ?? '');
-    const imageUrl = toSafeHttpUrl(r.primaryimageurl ?? null);
+
+    // IIIF-first selection
+    const iiif = r.images?.find((i) => i?.iiifbaseuri)?.iiifbaseuri?.replace(/\/$/, '') ?? null;
+    const base = r.images?.find((i) => i?.baseimageurl)?.baseimageurl ?? null;
+    const primary = r.primaryimageurl ?? null;
+
+    // Derive URLs with IIIF preference and safe fallbacks
+    const thumbnailUrl = toSafeHttpUrl(
+      iiif ? `${iiif}/full/500,/0/default.jpg` : (base ?? primary)
+    );
+    const imageUrl = toSafeHttpUrl(primary ?? (iiif ? `${iiif}/full/1200,/0/default.jpg` : base));
     const objectUrl = toSafeHttpUrl(r.url ?? null);
+
     return {
       id: String(r.id),
       title: title || 'Untitled',
       artist: artist || 'Unknown',
       date,
       imageUrl,
+      thumbnailUrl: thumbnailUrl ?? undefined, // optional field
       objectUrl,
       institution: 'Harvard Art Museums',
       source: 'harvard',
