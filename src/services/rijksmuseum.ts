@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { sanitiseToPlainText, toSafeHttpUrl } from '../utils/sanitiseHtml';
 import type { Artwork } from '../types/artwork';
 
-
 const RIJKS_KEY = import.meta.env.VITE_RIJKS_API_KEY as string | undefined;
 
 /** Keep only fields we actually use, aligned with the spike */
@@ -15,7 +14,7 @@ const RijksItemSchema = z.object({
   objectNumber: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
   principalOrFirstMaker: z.string().optional().nullable(),
-  webImage: RijksImageSchema.optional().nullable(),   // spike source for images
+  webImage: RijksImageSchema.optional().nullable(), // spike source for images
   links: RijksLinksSchema.optional().nullable(),
 });
 

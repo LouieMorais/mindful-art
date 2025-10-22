@@ -50,7 +50,11 @@ function rewriteIiifWidth(url: string, width: number): { url: string; changed: b
 
 function rewriteGoogleSize(url: string, size: number): { url: string; changed: boolean } {
   let host = '';
-  try { host = new URL(url).hostname; } catch { /* ignore */ }
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    /* ignore */
+  }
   if (!/\bgoogleusercontent\.com$/i.test(host)) return { url, changed: false };
 
   // Match a Google size token: =s<digits> optionally followed by dash-modifiers (e.g. -no, -c, -k)
