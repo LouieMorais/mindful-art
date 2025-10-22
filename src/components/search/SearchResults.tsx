@@ -3,11 +3,12 @@ import React from 'react';
 import type { Artwork } from '../../types/artwork';
 import ArtworkSearchCard from './ArtworkSearchCard';
 import { INSTITUTIONS } from '../../config/institutions';
+import { hasDisplayImage } from '../../utils/getDisplaySrc';
 
 /**
  * SearchResults
  * Groups and renders results by institution.
- * Filters to items that have a displayable image via thumbnail-first rule.
+ * Filters to items that have a displayable image via the canonical predicate.
  */
 interface SearchResultsProps {
   query: string;
@@ -19,7 +20,6 @@ export default function SearchResults({ query, results, isLoading }: SearchResul
   if (isLoading) return <p>Loading results…</p>;
   if (!query) return null;
 
-  const hasDisplayImage = (a: Artwork) => Boolean(a.thumbnailUrl ?? a.imageUrl);
   const total = Object.values(results).flat().filter(hasDisplayImage).length;
 
   if (total === 0) {

@@ -14,7 +14,7 @@ const RijksItemSchema = z.object({
   objectNumber: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
   principalOrFirstMaker: z.string().optional().nullable(),
-  webImage: RijksImageSchema.optional().nullable(),   // spike source for images
+  webImage: RijksImageSchema.optional().nullable(), // spike source for images
   links: RijksLinksSchema.optional().nullable(),
 });
 
