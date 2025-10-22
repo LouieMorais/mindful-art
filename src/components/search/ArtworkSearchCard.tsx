@@ -62,6 +62,18 @@ export default function ArtworkSearchCard({ artwork }: { artwork: Artwork }) {
             <time className="art-card__date">{artwork.year ?? artwork.date}</time>
           </>
         )}
+        <br />
+        <span className="art-card__institution">
+          <a
+            className="art-card__link"
+            href={recordHref}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Open museum record in a new tab"
+          >
+            Courtesy of {artwork.institution ?? 'an anonymous provider'}
+          </a>
+        </span>
       </figcaption>
 
       <div className="art-card__actions">
