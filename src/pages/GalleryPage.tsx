@@ -2,6 +2,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { SafeImage } from '../components/SafeImage';
 import { useGalleryStore } from '../store/galleryStore';
+import { getDisplaySrc, hasDisplayImage } from '../utils/getDisplaySrc';
 
 export default function GalleryPage() {
   const { id } = useParams();
@@ -50,30 +51,33 @@ export default function GalleryPage() {
               padding: 0,
             }}
           >
-            {gallery.artworks.map((a) => (
-              <li key={a.id}>
-                {a.imageUrl ? (
-                  <SafeImage
-                    src={a.imageUrl}
-                    alt={`${a.title} — ${a.artist}`}
-                    width={240}
-                    style={{ height: 'auto' }}
-                    loading="lazy"
-                    decoding="async"
-                    /* optionally restrict to known hosts:
-                       allowHosts={['cdn.your-domain.example']} */
-                  />
-                ) : (
-                  <div style={{ width: 240, height: 240 }} aria-label="No image available" />
-                )}
-                <p>
-                  <strong>{a.title}</strong>
-                  <br />
-                  {a.artist}
-                  {a.date ? ` — ${a.date}` : ''}
-                </p>
-              </li>
-            ))}
+            {gallery.artworks.filter(hasDisplayImage).map((a) => {
+              const src = getDisplaySrc(a);
+              return (
+                <li key={a.id}>
+                  {src ? (
+                    <SafeImage
+                      src={src}
+                      alt={`${a.title} — ${a.artist}`}
+                      width={500} // 500 px intrinsic thumbnail convention
+                      style={{ height: 'auto' }}
+                      loading="lazy"
+                      decoding="async"
+                      /* optionally restrict to known hosts:
+                         allowHosts={['cdn.your-domain.example']} */
+                    />
+                  ) : (
+                    <div style={{ width: 240, height: 240 }} aria-label="No image available" />
+                  )}
+                  <p>
+                    <strong>{a.title}</strong>
+                    <br />
+                    {a.artist}
+                    {a.date ? ` — ${a.date}` : ''}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

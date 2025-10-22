@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import { SafeImage } from '../components/SafeImage';
 import { useGalleryStore } from '../store/galleryStore';
+import { getDisplaySrc, hasDisplayImage } from '../utils/getDisplaySrc';
 
 export default function YourGalleriesPage() {
   const { galleries } = useGalleryStore();
@@ -46,6 +47,9 @@ export default function YourGalleriesPage() {
           <ul className="galleries-list__items">
             {galleries.map((g) => {
               const artworks = g.artworks ?? [];
+              // Apply Step 6: only render items that have a displayable image
+              const previewArtworks = artworks.filter(hasDisplayImage).slice(0, 12);
+
               return (
                 <li key={g.id} className="gallery-strap">
                   <article aria-labelledby={`g-${g.id}-title`}>
@@ -69,25 +73,30 @@ export default function YourGalleriesPage() {
                       aria-label={`Preview artworks in ${g.name}`}
                     >
                       <ul className="rail" aria-label="Artworks preview">
-                        {artworks.slice(0, 12).map((a) => (
-                          <li key={a.id} className="rail__item">
-                            {a.imageUrl ? (
-                              <SafeImage
-                                className="rail__image"
-                                src={a.imageUrl}
-                                alt={`${a.title} — ${a.artist}`}
-                                loading="lazy"
-                                decoding="async"
-                                /* Optionally restrict to known hosts:
-                                  allowHosts={['cdn.your-domain.example']}
-                                  If you store relative paths, omit allowHosts. */
-                              />
-                            ) : (
-                              <div className="rail__placeholder" aria-label="No image available" />
-                            )}
-                          </li>
-                        ))}
-                        {artworks.length === 0 && (
+                        {previewArtworks.map((a) => {
+                          const src = getDisplaySrc(a);
+                          return (
+                            <li key={a.id} className="rail__item">
+                              {src ? (
+                                <SafeImage
+                                  className="rail__image"
+                                  src={src}
+                                  alt={`${a.title} — ${a.artist}`}
+                                  width={500} // 500px intrinsic thumbnail convention
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                              ) : (
+                                <div
+                                  className="rail__placeholder"
+                                  aria-label="No image available"
+                                />
+                              )}
+                            </li>
+                          );
+                        })}
+
+                        {previewArtworks.length === 0 && (
                           <li className="rail__item rail__item--empty">
                             <div className="rail__empty">
                               <span>Let’s get this gallery started!</span>

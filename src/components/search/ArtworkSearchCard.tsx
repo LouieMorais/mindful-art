@@ -3,20 +3,19 @@ import React, { useState } from 'react';
 import type { Artwork } from '../../types/artwork';
 import { SafeImage } from '../SafeImage';
 import SaveToGalleryModal from '../modals/SaveToGalleryModal';
+import { getDisplaySrc } from '../../utils/getDisplaySrc';
 
 /**
  * ArtworkSearchCard
- * Renders a single artwork result card.
- * Displays a dedicated thumbnail when present, falling back to imageUrl.
- * Link targets and actions are unchanged when a record URL is available.
+ * List/rail card: ALWAYS use getDisplaySrc(a) to avoid full-res thumbnails.
  */
 export default function ArtworkSearchCard({ artwork }: { artwork: Artwork }) {
   const [open, setOpen] = useState(false);
 
-  const displaySrc = artwork.thumbnailUrl ?? artwork.imageUrl;
+  const displaySrc = getDisplaySrc(artwork);
   const hasImage = Boolean(displaySrc);
 
-  // Normalise nullable objectUrl (string | null) to string | undefined for <a href>
+  // Normalise nullable objectUrl to undefined for the <a href> prop
   const recordHref: string | undefined = artwork.objectUrl ?? undefined;
 
   const imageNode = hasImage ? (
@@ -24,7 +23,7 @@ export default function ArtworkSearchCard({ artwork }: { artwork: Artwork }) {
       src={displaySrc!}
       alt={`${artwork.title} — ${artwork.artist ?? 'Unknown'}`}
       className="art-card__image"
-      width={240}
+      width={500} // intrinsic width convention for thumbnails
       loading="lazy"
       decoding="async"
       sizes="(max-width: 600px) 50vw, (max-width: 1024px) 25vw, 240px"
@@ -48,7 +47,6 @@ export default function ArtworkSearchCard({ artwork }: { artwork: Artwork }) {
           {imageNode}
         </a>
       ) : (
-        // If there is no record URL, render a non-link wrapper to keep layout consistent.
         <div className="art-card__link" aria-label="No external record available">
           {imageNode}
         </div>
