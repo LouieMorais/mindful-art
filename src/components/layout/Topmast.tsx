@@ -18,7 +18,7 @@ export default function Topmast() {
           </li>
           <li>
             <Link to="/galleries" className="topmast__link">
-              My Galleries
+              Your Galleries
             </Link>
           </li>
         </ul>
