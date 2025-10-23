@@ -354,3 +354,52 @@ main {
 .art-card__objecturl {
   font-size: 0.8rem;
 }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.artworkcard-actions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.art-card__search,
+.art-card__gallery {
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  padding: 0.8rem;
+}
+.art-card__search img,
+.art-card__gallery img {
+  width: 100%;
+  margin: 0;
+}
+.art-card__search h3,
+.art-card__gallery h3 {
+  margin: 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.art-card__search dl,
+ul,
+li,
+dd {
+  margin: 0;
+  padding: 0;
+}
+.art-card__search li {
+  display: block;
+  list-style: none;
+  margin: 0.8rem 0;
+}

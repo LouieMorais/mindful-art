@@ -20,6 +20,13 @@ export default function GalleryPage() {
     );
   }
 
+  const openLocal = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Intentionally a no-op for now (modal deferred)
+
+    console.debug('openLocal (stub)');
+  };
+
   return (
     <main>
       <nav className="breadcrumb" aria-label="Breadcrumb">
@@ -53,28 +60,64 @@ export default function GalleryPage() {
           >
             {gallery.artworks.filter(hasDisplayImage).map((a) => {
               const src = getDisplaySrc(a);
+              const providerHref: string | undefined = a.objectUrl ?? undefined;
+
               return (
                 <li key={a.id}>
-                  {src ? (
-                    <SafeImage
-                      src={src}
-                      alt={`${a.title} — ${a.artist}`}
-                      width={500} // 500 px intrinsic thumbnail convention
-                      style={{ height: 'auto' }}
-                      loading="lazy"
-                      decoding="async"
-                      /* optionally restrict to known hosts:
-                         allowHosts={['cdn.your-domain.example']} */
-                    />
-                  ) : (
-                    <div style={{ width: 240, height: 240 }} aria-label="No image available" />
-                  )}
-                  <p>
-                    <strong>{a.title}</strong>
-                    <br />
-                    {a.artist}
-                    {a.date ? ` — ${a.date}` : ''}
-                  </p>
+                  <article data-artworkcard-context="gallery" className="art-card__gallery">
+                    {src ? (
+                      <a href="#" onClick={openLocal} aria-label="Open artwork locally">
+                        <SafeImage
+                          src={src}
+                          alt={`${a.title} — ${a.artist}`}
+                          width={500} // 500 px intrinsic thumbnail convention
+                          style={{ height: 'auto' }}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </a>
+                    ) : (
+                      <div
+                        className="art-card__noimage"
+                        role="img"
+                        aria-label="No image available"
+                        style={{ width: 240, height: 240 }}
+                      >
+                        <span className="art-card__noimage__label" aria-hidden="true">
+                          No image available
+                        </span>
+                      </div>
+                    )}
+
+                    <h3 className="art-card__title">
+                      <a href="#" onClick={openLocal}>
+                        {a.title || 'Untitled'}
+                      </a>
+                    </h3>
+
+                    <dl className="art-card__meta">
+                      <dt className="visually-hidden">Artist</dt>
+                      <dd className="art-card__artist">{a.artist || 'Unknown artist'}</dd>
+
+                      {a.date && (
+                        <>
+                          <dt className="visually-hidden">Date</dt>
+                          <dd className="art-card__date">{a.date}</dd>
+                        </>
+                      )}
+
+                      {providerHref && (
+                        <>
+                          <dt className="visually-hidden">Institution</dt>
+                          <dd className="art-card__institution">
+                            <a href={providerHref} target="_blank" rel="noreferrer">
+                              Courtesy of {a.institution || 'the provider'}
+                            </a>
+                          </dd>
+                        </>
+                      )}
+                    </dl>
+                  </article>
                 </li>
               );
             })}

@@ -1,88 +1,110 @@
 // src/components/search/ArtworkSearchCard.tsx
-import React, { useState } from 'react';
-import type { Artwork } from '../../types/artwork';
-import { SafeImage } from '../SafeImage';
-import SaveToGalleryModal from '../modals/SaveToGalleryModal';
-import { getDisplaySrc } from '../../utils/getDisplaySrc';
 
 /**
- * ArtworkSearchCard
- * List/rail card: ALWAYS use getDisplaySrc(a) to avoid full-res thumbnails.
+ * Search cards: render semantic HTML for all instances.
+ * - Structure: <article> + <h3> + <dl>/<dt>/<dd>
+ * - Thumbnail/title: local no-op click handler (modal deferred)
+ * - Institution: only external link (provider page)
+ * - Preserve existing classes and image utilities; no CSS/wrapper changes
  */
-export default function ArtworkSearchCard({ artwork }: { artwork: Artwork }) {
-  const [open, setOpen] = useState(false);
 
+import React, { useState } from 'react';
+import { SafeImage } from '../SafeImage';
+import { getDisplaySrc, hasDisplayImage } from '../../utils/getDisplaySrc';
+import type { Artwork } from '../../types/artwork';
+import SaveToGalleryModal from '../modals/SaveToGalleryModal';
+
+type Props = { artwork: Artwork };
+
+const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
+  const [isSaveOpen, setSaveOpen] = useState(false);
+
+  const canDisplay = hasDisplayImage(artwork);
   const displaySrc = getDisplaySrc(artwork);
-  const hasImage = Boolean(displaySrc);
+  // Use undefined (not null) so <a href> typing is satisfied when used
+  const providerHref: string | undefined = artwork.objectUrl ?? undefined;
 
-  // Normalise nullable objectUrl to undefined for the <a href> prop
-  const recordHref: string | undefined = artwork.objectUrl ?? undefined;
+  const openLocal = (e: React.MouseEvent) => {
+    e.preventDefault();
 
-  const imageNode = hasImage ? (
-    <SafeImage
-      src={displaySrc!}
-      alt={`${artwork.title} — ${artwork.artist ?? 'Unknown'}`}
-      className="art-card__image"
-      width={500} // intrinsic width convention for thumbnails
-      loading="lazy"
-      decoding="async"
-      sizes="(max-width: 600px) 50vw, (max-width: 1024px) 25vw, 240px"
-    />
-  ) : (
-    <div className="art-card__placeholder" aria-label="No image available">
-      <span>No Image</span>
-    </div>
-  );
+    console.debug('openLocal (stub)', artwork);
+  };
+
+  const onRemoveStub = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    console.debug('remove from gallery (stub)', artwork);
+  };
 
   return (
-    <figure className="art-card" aria-label={`${artwork.title} — ${artwork.artist ?? 'Unknown'}`}>
-      {recordHref ? (
-        <a
-          className="art-card__link"
-          href={recordHref}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Open museum record in a new tab"
-        >
-          {imageNode}
-        </a>
-      ) : (
-        <div className="art-card__link" aria-label="No external record available">
-          {imageNode}
-        </div>
-      )}
-
-      <figcaption className="art-card__caption">
-        <strong className="art-card__title">{artwork.title}</strong>
-        <br />
-        <span className="art-card__artist">{artwork.artist ?? 'Unknown artist'}</span>
-        {(artwork.year ?? artwork.date) && (
-          <>
-            <br />
-            <time className="art-card__date">{artwork.year ?? artwork.date}</time>
-          </>
-        )}
-        <br />
-        <span className="art-card__institution">
-          <a
-            className="art-card__link"
-            href={recordHref}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Open museum record in a new tab"
-          >
-            Courtesy of {artwork.institution ?? 'an anonymous provider'}
+    <>
+      <article data-artworkcard-context="search" className="art-card__search">
+        {canDisplay ? (
+          <a href="#" onClick={openLocal} aria-label="Open artwork locally">
+            <SafeImage src={displaySrc} width={500} alt={artwork.title || 'Artwork'} />
           </a>
-        </span>
-      </figcaption>
+        ) : (
+          <div className="art-card__noimage">
+            <span className="art-card__noimage__label">No image available</span>
+            {providerHref && (
+              <a
+                className="art-card__noimage__provider"
+                href={providerHref}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View on provider
+              </a>
+            )}
+          </div>
+        )}
 
-      <div className="art-card__actions">
-        <button type="button" className="btn btn-primary" onClick={() => setOpen(true)}>
-          Save to Gallery
-        </button>
-      </div>
+        <h3 className="art-card__title">
+          <a href="#" onClick={openLocal}>
+            {artwork.title || 'Untitled'}
+          </a>
+        </h3>
 
-      {open && <SaveToGalleryModal artwork={artwork} onClose={() => setOpen(false)} />}
-    </figure>
+        <dl className="art-card__meta">
+          <dt className="visually-hidden">Artist</dt>
+          <dd className="art-card__artist">{artwork.artist || 'Unknown artist'}</dd>
+
+          {artwork.date && (
+            <>
+              <dt className="visually-hidden">Date</dt>
+              <dd className="art-card__date">{artwork.date}</dd>
+            </>
+          )}
+
+          {providerHref && (
+            <>
+              <dt className="visually-hidden">Institution</dt>
+              <dd className="art-card__institution">
+                <a href={providerHref} target="_blank" rel="noreferrer">
+                  Courtesy of {artwork.institution || 'the provider'}
+                </a>
+              </dd>
+            </>
+          )}
+        </dl>
+
+        <ul className="art-card__actions">
+          <li className="art-card__save">
+            <button type="button" className="btn btn-primary" onClick={() => setSaveOpen(true)}>
+              Save to Gallery
+            </button>
+          </li>
+          <li className="art-card__remove">
+            <a href="#" onClick={onRemoveStub}>
+              Remove from Gallery
+            </a>
+          </li>
+        </ul>
+      </article>
+
+      {isSaveOpen && <SaveToGalleryModal artwork={artwork} onClose={() => setSaveOpen(false)} />}
+    </>
   );
-}
+};
+
+export default ArtworkSearchCard;

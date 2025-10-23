@@ -47,8 +47,8 @@ export default function YourGalleriesPage() {
           <ul className="galleries-list__items">
             {galleries.map((g) => {
               const artworks = g.artworks ?? [];
-              // Apply Step 6: only render items that have a displayable image
               const previewArtworks = artworks.filter(hasDisplayImage).slice(0, 12);
+              const countText = `${artworks.length} ${artworks.length === 1 ? 'artwork' : 'artworks'}`;
 
               return (
                 <li key={g.id} className="gallery-strap">
@@ -58,15 +58,12 @@ export default function YourGalleriesPage() {
                         {g.name}
                       </h2>
                       <p className="gallery-strap__meta">
-                        <span className="gallery-strap__count">
-                          {artworks.length} {artworks.length === 1 ? 'artwork' : 'artworks'}
-                        </span>
-                        {/* Placeholder for future metrics (e.g., appreciations/ contemplations) */}
+                        <span className="gallery-strap__count">{countText}</span>
                         <span className="visually-hidden"> • metrics pending</span>
                       </p>
                     </header>
 
-                    {/* Horizontal preview rail (structural only) */}
+                    {/* Horizontal preview rail (accessible thumbnails) */}
                     <div
                       className="gallery-strap__rail"
                       role="region"
@@ -75,23 +72,33 @@ export default function YourGalleriesPage() {
                       <ul className="rail" aria-label="Artworks preview">
                         {previewArtworks.map((a) => {
                           const src = getDisplaySrc(a);
+                          const labelId = `rail-g-${g.id}-label`;
                           return (
                             <li key={a.id} className="rail__item">
-                              {src ? (
-                                <SafeImage
-                                  className="rail__image"
-                                  src={src}
-                                  alt={`${a.title} — ${a.artist}`}
-                                  width={500} // 500px intrinsic thumbnail convention
-                                  loading="lazy"
-                                  decoding="async"
-                                />
-                              ) : (
-                                <div
-                                  className="rail__placeholder"
-                                  aria-label="No image available"
-                                />
-                              )}
+                              <article data-artworkcard-context="rail" className="art-card__rail">
+                                <a href={`/gallery/${g.id}`} aria-labelledby={labelId}>
+                                  {src ? (
+                                    <SafeImage
+                                      className="rail__image"
+                                      src={src}
+                                      alt=""
+                                      aria-hidden="true"
+                                      width={500}
+                                      loading="lazy"
+                                      decoding="async"
+                                    />
+                                  ) : (
+                                    <div className="rail__placeholder" aria-hidden="true">
+                                      <span className="art-card__noimage__label">
+                                        No image available
+                                      </span>
+                                    </div>
+                                  )}
+                                  <span id={labelId} className="visually-hidden">
+                                    {g.name} — {countText}
+                                  </span>
+                                </a>
+                              </article>
                             </li>
                           );
                         })}
