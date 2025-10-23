@@ -69,7 +69,6 @@ function useArtworkModal() {
 
 /* ---------------- Step 0.3.2 helpers ---------------- */
 
-/** Minimum target width for the modal image; upscale with DPR and viewport width. */
 function computeRequestedWidth(): number {
   if (typeof window === 'undefined') return 1000;
   const dpr = Math.max(1, window.devicePixelRatio || 1);
@@ -78,35 +77,73 @@ function computeRequestedWidth(): number {
 }
 
 /**
- * Try to derive a larger IIIF-style URL from the card's display src.
- * Supported patterns (best-effort, safe fallback to the original URL):
- *   1) /full/{size}/0/  → replace {size} with `${w},`
- *   2) ?width=500       → replace with `width=w`
+ * Prefer the "full/base" image URL if the artwork provides it; otherwise fall back to the
+ * display (thumbnail) URL. This avoids being stuck at 500px for providers like Rijksmuseum.
  */
-function buildModalImageSrcFromDisplaySrc(
-  displaySrc: string | undefined,
-  w: number
-): string | undefined {
-  if (!displaySrc) return undefined;
+function pickModalBaseUrl(art: Artwork, displaySrc: string | undefined): string | undefined {
+  // If your Artwork type exposes a canonical/original image URL, use it first:
+  // (The doc shows `imageUrl` in types; if absent in some items, we fall back)
+  return art.imageUrl ?? displaySrc;
+}
 
-  // pattern 1: IIIF path /full/{size}/0/
-  const iiifPath = /\/full\/([^/]+)\/0\//;
-  if (iiifPath.test(displaySrc)) {
-    return displaySrc.replace(iiifPath, `/full/${w},/0/`);
-  }
+/**
+ * Make a larger image URL from common provider patterns.
+ * Handles typical IIIF and CDN query/suffix conventions. Falls back safely.
+ */
+function buildSizedUrl(urlStr: string | undefined, w: number): string | undefined {
+  if (!urlStr) return undefined;
 
-  // pattern 2: width= query param
-  if (displaySrc.includes('width=')) {
-    const url = new URL(
-      displaySrc,
+  // Try robust URL parsing for query-based variants; otherwise operate as string.
+  let parsed: URL | null = null;
+  try {
+    parsed = new URL(
+      urlStr,
       typeof window !== 'undefined' ? window.location.href : 'http://localhost'
     );
-    url.searchParams.set('width', String(w));
-    return url.toString();
+  } catch {
+    parsed = null;
   }
 
-  // Fallback: return original (will still work, just not optimised)
-  return displaySrc;
+  const replaceIIIFSize = (s: string) => {
+    // IIIF path: /full/{size}/0/  -> use /full/{w},/0/
+    s = s.replace(/\/full\/[^/]+\/0\//, `/full/${w},/0/`);
+    // IIIF path: /square/{size}/0/ -> prefer a full rendition for the modal
+    s = s.replace(/\/square\/[^/]+\/0\//, `/full/${w},/0/`);
+    return s;
+  };
+
+  // Case A: IIIF-style path sizing
+  if (/\/(full|square)\/[^/]+\/0\//.test(urlStr)) {
+    return replaceIIIFSize(urlStr);
+  }
+
+  // Case B: query parameters (width/w + optional height/h)
+  if (parsed) {
+    let mutated = false;
+    if (parsed.searchParams.has('width')) {
+      parsed.searchParams.set('width', String(w));
+      mutated = true;
+      // Remove conflicting height constraints if present
+      if (parsed.searchParams.has('height')) parsed.searchParams.delete('height');
+      if (parsed.searchParams.has('h')) parsed.searchParams.delete('h');
+    } else if (parsed.searchParams.has('w')) {
+      parsed.searchParams.set('w', String(w));
+      mutated = true;
+      if (parsed.searchParams.has('h')) parsed.searchParams.delete('h');
+      if (parsed.searchParams.has('height')) parsed.searchParams.delete('height');
+    }
+    if (mutated) return parsed.toString();
+  }
+
+  // Case C: common CDN suffix pattern e.g. ...=s500, ...=w500
+  // Upgrade =s{n} or =w{n} at the end or before other params
+  const suffixUpgraded = urlStr
+    .replace(/=s(\d+)(?=$|[&#?])/, `=s${w}`)
+    .replace(/=w(\d+)(?=$|[&#?])/, `=w${w}`);
+  if (suffixUpgraded !== urlStr) return suffixUpgraded;
+
+  // Fallback: return original
+  return urlStr;
 }
 
 /* ---------------- Existing component (imports and structure preserved) ---------------- */
@@ -116,7 +153,7 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
 
   // CARD THUMBNAIL: keep as before — SafeImage + getDisplaySrc → 500px thumbnail
   const canDisplay = hasDisplayImage(artwork);
-  const displaySrc = getDisplaySrc(artwork); // expected to be a 500px (or provider-optimised) URL
+  const displaySrc = getDisplaySrc(artwork); // expected to be a 500px URL
   const providerHref: string | undefined = artwork.objectUrl ?? undefined;
 
   // 0.3.1: wire clicks to open the modal
@@ -129,11 +166,12 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
 
   const titleText = artwork.title || 'Untitled';
 
-  // 0.3.2: compute modal image URL at higher resolution (separate request from thumbnail)
+  // 0.3.2: compute modal image URL from the *base* image URL (or fallback to display src)
   const requestedWidth = computeRequestedWidth();
+  const modalBaseUrl = useMemo(() => pickModalBaseUrl(artwork, displaySrc), [artwork, displaySrc]);
   const modalImageSrc = useMemo(
-    () => buildModalImageSrcFromDisplaySrc(displaySrc, requestedWidth),
-    [displaySrc, requestedWidth]
+    () => buildSizedUrl(modalBaseUrl, requestedWidth),
+    [modalBaseUrl, requestedWidth]
   );
 
   return (
@@ -227,7 +265,7 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
             Close
           </button>
 
-          {/* Image: separate, higher-resolution request; never a link */}
+          {/* Image: separate, higher-resolution request from base URL; never a link */}
           {modalImageSrc && (
             <SafeImage
               className="artwork__image"
@@ -235,7 +273,6 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
               alt={`${titleText} — ${artwork.artist || 'Unknown'}`}
               width={requestedWidth}
               decoding="async"
-              // 100% width in layout; SafeImage guards the URL & attributes
               style={{ width: '100%', height: 'auto', display: 'block' }}
               sizes="100vw"
             />
