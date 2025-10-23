@@ -134,10 +134,16 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
   // If true, we re-open the artwork modal after the Save overlay closes
   const [reopenAfterSave, setReopenAfterSave] = useState(false);
 
-  // CARD THUMBNAIL: keep as before — SafeImage + getDisplaySrc → 500px thumbnail
+  // CARD THUMBNAIL: get base display src
   const canDisplay = hasDisplayImage(artwork);
-  const displaySrc = getDisplaySrc(artwork); // 500px (or provider-optimised) URL
+  const displaySrc = getDisplaySrc(artwork); // may be 500px or a base IIIF URL depending on provider
   const providerHref: string | undefined = artwork.objectUrl ?? undefined;
+
+  // --- HARDEN THUMBNAIL SIZE TO 500px (fixes Rijks full-res thumbnails) ---
+  const thumbSrc = useMemo(
+    () => (displaySrc ? (buildSizedUrl(displaySrc, 500) ?? displaySrc) : undefined),
+    [displaySrc]
+  );
 
   // Artwork modal wiring
   const modal = useArtworkModal();
@@ -170,9 +176,7 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
     setSaveOpen(false);
     if (reopenAfterSave) {
       setReopenAfterSave(false);
-      // Re-open the artwork modal. We pass the add button as the “invoker” so
-      // that when the user closes the modal afterwards, focus returns there.
-      modal.open(addBtnRef.current);
+      modal.open(addBtnRef.current); // re-open and later restore focus to Add button
     }
   };
 
@@ -182,7 +186,7 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
         {canDisplay ? (
           <a href="#" onClick={onOpenFrom} aria-label="Open artwork locally">
             <SafeImage
-              src={displaySrc!}
+              src={thumbSrc!}
               alt={titleText}
               className="art-card__image"
               width={500}
