@@ -3,9 +3,12 @@
 /**
  * Search cards: render semantic HTML for all instances.
  * - Structure: <article> + <h3> + <dl>/<dt>/<dd>
- * - Thumbnail/title: now open a local Artwork Modal (<dialog>) per 0.3.1 wiring
+ * - Thumbnail/title: open a local Artwork Modal (<dialog>)
  * - Institution: only external link (provider page)
  * - Preserve existing classes and image utilities; no CSS/wrapper changes
+ * - NEW: inside the Artwork Modal, an "Add to Gallery" button closes this dialog
+ *        and opens SaveToGalleryModal; on close, we re-open this dialog and
+ *        restore focus to the "Add to Gallery" button.
  */
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -16,7 +19,7 @@ import SaveToGalleryModal from '../modals/SaveToGalleryModal';
 
 type Props = { artwork: Artwork };
 
-/* ---------------- 0.3.1: minimal modal wiring (retained) ---------------- */
+/* ---------------- dialog wiring ---------------- */
 
 function useArtworkModal() {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
@@ -29,12 +32,10 @@ function useArtworkModal() {
   }, []);
 
   const close = useCallback(() => {
-    // Close via dialog API (native only; no Safari polyfill per sprint scope)
     dialogRef.current?.close();
     setIsOpen(false);
   }, []);
 
-  // When opening, call showModal() and focus the Close button
   useEffect(() => {
     if (!isOpen) return;
     const dlg = dialogRef.current;
@@ -45,17 +46,14 @@ function useArtworkModal() {
     }
   }, [isOpen]);
 
-  // Restore focus to invoker after close
   const handleClose = useCallback(() => {
     const invoker = invokerRef.current;
     invokerRef.current = null;
     if (invoker && typeof invoker.focus === 'function') {
-      // Defer to next tick to ensure DOM is stable
       setTimeout(() => invoker.focus(), 0);
     }
   }, []);
 
-  // Ensure Esc uses our close() so focus restoration runs
   const handleCancel = useCallback(
     (e: React.SyntheticEvent<HTMLDialogElement, Event>) => {
       e.preventDefault();
@@ -67,7 +65,7 @@ function useArtworkModal() {
   return { dialogRef, isOpen, open, close, handleClose, handleCancel };
 }
 
-/* ---------------- Step 0.3.2 helpers ---------------- */
+/* ---------------- helpers ---------------- */
 
 function computeRequestedWidth(): number {
   if (typeof window === 'undefined') return 1000;
@@ -77,87 +75,73 @@ function computeRequestedWidth(): number {
 }
 
 /**
- * Prefer the "full/base" image URL if the artwork provides it; otherwise fall back to the
- * display (thumbnail) URL. This avoids being stuck at 500px for providers like Rijksmuseum.
+ * Prefer a canonical/base image if available; otherwise fall back to display (thumb) URL.
+ * This prevents being stuck at 500px for providers like Rijksmuseum.
  */
-function pickModalBaseUrl(art: Artwork, displaySrc: string | undefined): string | undefined {
-  // If your Artwork type exposes a canonical/original image URL, use it first:
-  // (The doc shows `imageUrl` in types; if absent in some items, we fall back)
-  return art.imageUrl ?? displaySrc;
+function pickModalBaseUrl(art: Artwork, displaySrc?: string): string | undefined {
+  const withImage = art as Partial<Artwork> & { imageUrl?: string };
+  return withImage.imageUrl ?? displaySrc;
 }
 
-/**
- * Make a larger image URL from common provider patterns.
- * Handles typical IIIF and CDN query/suffix conventions. Falls back safely.
- */
+/** Upsize common IIIF/CDN patterns; fall back safely. */
 function buildSizedUrl(urlStr: string | undefined, w: number): string | undefined {
   if (!urlStr) return undefined;
 
-  // Try robust URL parsing for query-based variants; otherwise operate as string.
-  let parsed: URL | null = null;
+  // Case A: IIIF path size (/full|/square)
+  if (/\/(full|square)\/[^/]+\/0\//.test(urlStr)) {
+    return urlStr
+      .replace(/\/square\/[^/]+\/0\//, `/full/${w},/0/`)
+      .replace(/\/full\/[^/]+\/0\//, `/full/${w},/0/`);
+  }
+
+  // Case B: query params width/w
   try {
-    parsed = new URL(
+    const parsed = new URL(
       urlStr,
       typeof window !== 'undefined' ? window.location.href : 'http://localhost'
     );
-  } catch {
-    parsed = null;
-  }
-
-  const replaceIIIFSize = (s: string) => {
-    // IIIF path: /full/{size}/0/  -> use /full/{w},/0/
-    s = s.replace(/\/full\/[^/]+\/0\//, `/full/${w},/0/`);
-    // IIIF path: /square/{size}/0/ -> prefer a full rendition for the modal
-    s = s.replace(/\/square\/[^/]+\/0\//, `/full/${w},/0/`);
-    return s;
-  };
-
-  // Case A: IIIF-style path sizing
-  if (/\/(full|square)\/[^/]+\/0\//.test(urlStr)) {
-    return replaceIIIFSize(urlStr);
-  }
-
-  // Case B: query parameters (width/w + optional height/h)
-  if (parsed) {
     let mutated = false;
     if (parsed.searchParams.has('width')) {
       parsed.searchParams.set('width', String(w));
+      parsed.searchParams.delete('height');
+      parsed.searchParams.delete('h');
       mutated = true;
-      // Remove conflicting height constraints if present
-      if (parsed.searchParams.has('height')) parsed.searchParams.delete('height');
-      if (parsed.searchParams.has('h')) parsed.searchParams.delete('h');
     } else if (parsed.searchParams.has('w')) {
       parsed.searchParams.set('w', String(w));
+      parsed.searchParams.delete('h');
+      parsed.searchParams.delete('height');
       mutated = true;
-      if (parsed.searchParams.has('h')) parsed.searchParams.delete('h');
-      if (parsed.searchParams.has('height')) parsed.searchParams.delete('height');
     }
     if (mutated) return parsed.toString();
+  } catch {
+    /* noop */
   }
 
-  // Case C: common CDN suffix pattern e.g. ...=s500, ...=w500
-  // Upgrade =s{n} or =w{n} at the end or before other params
-  const suffixUpgraded = urlStr
+  // Case C: common CDN suffix (=s500/=w500)
+  const upgraded = urlStr
     .replace(/=s(\d+)(?=$|[&#?])/, `=s${w}`)
     .replace(/=w(\d+)(?=$|[&#?])/, `=w${w}`);
-  if (suffixUpgraded !== urlStr) return suffixUpgraded;
+  if (upgraded !== urlStr) return upgraded;
 
-  // Fallback: return original
   return urlStr;
 }
 
-/* ---------------- Existing component (imports and structure preserved) ---------------- */
+/* ---------------- component ---------------- */
 
 const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
+  // Existing Save overlay state (used for sequential modals)
   const [isSaveOpen, setSaveOpen] = useState(false);
+  // If true, we re-open the artwork modal after the Save overlay closes
+  const [reopenAfterSave, setReopenAfterSave] = useState(false);
 
   // CARD THUMBNAIL: keep as before — SafeImage + getDisplaySrc → 500px thumbnail
   const canDisplay = hasDisplayImage(artwork);
-  const displaySrc = getDisplaySrc(artwork); // expected to be a 500px URL
+  const displaySrc = getDisplaySrc(artwork); // 500px (or provider-optimised) URL
   const providerHref: string | undefined = artwork.objectUrl ?? undefined;
 
-  // 0.3.1: wire clicks to open the modal
+  // Artwork modal wiring
   const modal = useArtworkModal();
+  const addBtnRef = useRef<HTMLButtonElement | null>(null);
 
   const onOpenFrom = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
@@ -166,13 +150,31 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
 
   const titleText = artwork.title || 'Untitled';
 
-  // 0.3.2: compute modal image URL from the *base* image URL (or fallback to display src)
+  // Modal image URL at higher resolution (separate from 500px thumb)
   const requestedWidth = computeRequestedWidth();
   const modalBaseUrl = useMemo(() => pickModalBaseUrl(artwork, displaySrc), [artwork, displaySrc]);
   const modalImageSrc = useMemo(
     () => buildSizedUrl(modalBaseUrl, requestedWidth),
     [modalBaseUrl, requestedWidth]
   );
+
+  // Sequential modals behaviour: Artwork → Save → Artwork
+  const onAddToGalleryFromModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setReopenAfterSave(true);
+    setSaveOpen(true); // open Save overlay
+    modal.close(); // close Artwork overlay
+  };
+
+  const handleSaveClose = () => {
+    setSaveOpen(false);
+    if (reopenAfterSave) {
+      setReopenAfterSave(false);
+      // Re-open the artwork modal. We pass the add button as the “invoker” so
+      // that when the user closes the modal afterwards, focus returns there.
+      modal.open(addBtnRef.current);
+    }
+  };
 
   return (
     <>
@@ -211,7 +213,6 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
               {titleText}
             </a>
           ) : (
-            // No link at all when there is no image
             <span>{titleText}</span>
           )}
         </h3>
@@ -248,10 +249,10 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
         </ul>
       </article>
 
-      {/* Existing Save modal (unchanged) */}
-      {isSaveOpen && <SaveToGalleryModal artwork={artwork} onClose={() => setSaveOpen(false)} />}
+      {/* Existing Save overlay (card-level entry point remains) */}
+      {isSaveOpen && <SaveToGalleryModal artwork={artwork} onClose={handleSaveClose} />}
 
-      {/* ===== 0.3.2: Artwork Modal (spec-compliant content) ===== */}
+      {/* ===== Artwork Modal ===== */}
       {modal.isOpen && (
         <dialog
           className="artwork__modal"
@@ -260,12 +261,11 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
           onClose={modal.handleClose}
           onCancel={modal.handleCancel}
         >
-          {/* Close button first in DOM, focus target on open */}
           <button type="button" data-close onClick={modal.close} aria-label="Close modal">
             Close
           </button>
 
-          {/* Image: separate, higher-resolution request from base URL; never a link */}
+          {/* Image (separate high-res request), never a link */}
           {modalImageSrc && (
             <SafeImage
               className="artwork__image"
@@ -278,7 +278,7 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
             />
           )}
 
-          {/* Title (H1) */}
+          {/* Title */}
           <h1 id="artwork-modal-title" className="artwork__title">
             {titleText}
           </h1>
@@ -286,24 +286,34 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
           {/* Artist */}
           {artwork.artist && <p className="artwork__artist">{artwork.artist}</p>}
 
-          {/* Date / Year */}
+          {/* Date */}
           {artwork.date && <p className="artwork__date">{artwork.date}</p>}
 
-          {/* Institution label (no link) */}
+          {/* Institution (no link) */}
           {artwork.institution && (
             <p className="artwork__institution">Courtesy of {artwork.institution}</p>
           )}
 
-          {/* Object Source (objectUrl) Link */}
-          {providerHref && (
-            <ul>
+          {/* Source link + Add to Gallery (sequential modals) */}
+          <ul>
+            {providerHref && (
               <li className="artwork-object_url">
                 <a href={providerHref} target="_blank" rel="noopener noreferrer">
                   Source Link
                 </a>
               </li>
-            </ul>
-          )}
+            )}
+            <li>
+              <button
+                ref={addBtnRef}
+                type="button"
+                className="btn btn-primary"
+                onClick={onAddToGalleryFromModal}
+              >
+                Add to Gallery
+              </button>
+            </li>
+          </ul>
         </dialog>
       )}
     </>
