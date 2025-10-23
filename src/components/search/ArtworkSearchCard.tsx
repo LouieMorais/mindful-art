@@ -145,6 +145,10 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
     [displaySrc]
   );
 
+  // --------------------- NO-IMAGE FILTER (only change) ---------------------
+  if (!canDisplay) return null;
+  // ------------------------------------------------------------------------
+
   // Artwork modal wiring
   const modal = useArtworkModal();
   const addBtnRef = useRef<HTMLButtonElement | null>(null);
