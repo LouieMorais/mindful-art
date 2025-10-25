@@ -1,138 +1,163 @@
 // src/pages/GalleryPage.tsx
-import { useEffect, useMemo, useRef, useState } from 'react';
+
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { SafeImage } from '../components/SafeImage';
 import { useGalleryStore } from '../store/galleryStore';
 import { getDisplaySrc, hasDisplayImage } from '../utils/getDisplaySrc';
+import SaveToGalleryModal from '../components/modals/SaveToGalleryModal';
+import type { Artwork } from '../types/artwork';
 
 /**
- * Phase 0.3.7 — Full modal content + a11y/resilience
- * - Modal shows: image (max available), title, artist, date, institution, Source Link
- * - a11y: aria-labelledby/aria-describedby, focus trap, focus return, Esc close
- * - Resilience: all fields optional; Source Link only if safe URL present
- * - No shared component extraction; all state remains local and reversible
+ * Gallery page rendering remains as before.
+ * Added: IDENTICAL modal logic and helpers from ArtworkSearchCard.tsx.
+ * Source for parity: src/components/search/ArtworkSearchCard.tsx
  */
 
-type ArtworkLike = {
-  id: string;
-  title?: string;
-  artist?: string;
-  date?: string;
-  institution?: string;
-  objectUrl?: string; // external source page
-};
+/* ---------------- dialog wiring (copied from ArtworkSearchCard) ---------------- */
+
+function useArtworkModal() {
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const invokerRef = useRef<HTMLElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const open = useCallback((invoker: HTMLElement | null) => {
+    invokerRef.current = invoker;
+    setIsOpen(true);
+  }, []);
+
+  const close = useCallback(() => {
+    dialogRef.current?.close();
+    setIsOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const dlg = dialogRef.current;
+    if (dlg && typeof dlg.showModal === 'function') {
+      dlg.showModal();
+      const closeBtn = dlg.querySelector<HTMLButtonElement>('button[data-close]');
+      closeBtn?.focus();
+    }
+  }, [isOpen]);
+
+  const handleClose = useCallback(() => {
+    const invoker = invokerRef.current;
+    invokerRef.current = null;
+    if (invoker && typeof invoker.focus === 'function') {
+      setTimeout(() => invoker.focus(), 0);
+    }
+  }, []);
+
+  const handleCancel = useCallback(
+    (e: React.SyntheticEvent<HTMLDialogElement, Event>) => {
+      e.preventDefault();
+      close();
+    },
+    [close]
+  );
+
+  return { dialogRef, isOpen, open, close, handleClose, handleCancel };
+}
+
+/* ---------------- helpers (copied from ArtworkSearchCard) ---------------- */
+
+function computeRequestedWidth(): number {
+  if (typeof window === 'undefined') return 1000;
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const vw = Math.max(320, window.innerWidth || 0);
+  return Math.max(1000, Math.round(dpr * vw));
+}
+
+/**
+ * Prefer a canonical/base image if available; otherwise fall back to display (thumb) URL.
+ * This prevents being stuck at 500px for providers like Rijksmuseum.
+ */
+function pickModalBaseUrl(art: Artwork, displaySrc?: string): string | undefined {
+  const withImage = art as Partial<Artwork> & { imageUrl?: string };
+  return withImage.imageUrl ?? displaySrc;
+}
+
+/** Upsize common IIIF/CDN patterns; fall back safely. */
+function buildSizedUrl(urlStr: string | undefined, w: number): string | undefined {
+  if (!urlStr) return undefined;
+
+  // Case A: IIIF path size (/full|/square)
+  if (/\/(full|square)\/[^/]+\/0\//.test(urlStr)) {
+    return urlStr
+      .replace(/\/square\/[^/]+\/0\//, `/full/${w},/0/`)
+      .replace(/\/full\/[^/]+\/0\//, `/full/${w},/0/`);
+  }
+
+  // Case B: query params width/w
+  try {
+    const parsed = new URL(
+      urlStr,
+      typeof window !== 'undefined' ? window.location.href : 'http://localhost'
+    );
+    let mutated = false;
+    if (parsed.searchParams.has('width')) {
+      parsed.searchParams.set('width', String(w));
+      parsed.searchParams.delete('height');
+      parsed.searchParams.delete('h');
+      mutated = true;
+    } else if (parsed.searchParams.has('w')) {
+      parsed.searchParams.set('w', String(w));
+      parsed.searchParams.delete('h');
+      parsed.searchParams.delete('height');
+      mutated = true;
+    }
+    if (mutated) return parsed.toString();
+  } catch {
+    /* noop */
+  }
+
+  // Case C: common CDN suffix (=s500/=w500)
+  const upgraded = urlStr
+    .replace(/=s(\d+)(?=$|[&#?])/, `=s${w}`)
+    .replace(/=w(\d+)(?=$|[&#?])/, `=w${w}`);
+  if (upgraded !== urlStr) return upgraded;
+
+  return urlStr;
+}
+
+/* ---------------- component ---------------- */
 
 export default function GalleryPage() {
   const { id } = useParams();
   const { getGallery } = useGalleryStore();
   const gallery = id ? getGallery(id) : undefined;
 
-  // --- Modal state (file-local) ---
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
-  const lastInvokerRef = useRef<HTMLElement | null>(null);
+  // Selected artwork for the modal (gallery page needs to set this before opening modal)
+  const [selected, setSelected] = useState<Artwork | null>(null);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [artworkForModal, setArtworkForModal] = useState<ArtworkLike | null>(null);
+  // Sequential modals (identical behaviour as search card): Artwork → Save → Artwork
+  const [isSaveOpen, setSaveOpen] = useState(false);
+  const [reopenAfterSave, setReopenAfterSave] = useState(false);
+  const addBtnRef = useRef<HTMLButtonElement | null>(null);
 
-  // For labelling/description
-  const modalTitleId = 'artwork-modal-title';
-  const modalDescId = 'artwork-modal-desc';
+  const modal = useArtworkModal();
 
-  // Open/Close
-  const open = (art: ArtworkLike, invoker: HTMLElement | null) => {
-    setArtworkForModal(art);
-    lastInvokerRef.current = invoker;
-
-    const dlg = dialogRef.current;
-    if (dlg && typeof dlg.showModal === 'function') {
-      dlg.showModal();
-      setIsOpen(true);
-      queueMicrotask(() => {
-        closeBtnRef.current?.focus();
-      });
-    }
+  const onOpenFrom = (art: Artwork) => (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    setSelected(art);
+    modal.open(e.currentTarget as HTMLElement);
   };
 
-  const close = () => {
-    const dlg = dialogRef.current;
-    if (dlg && typeof dlg.close === 'function') {
-      dlg.close();
-    }
-    setIsOpen(false);
-    setArtworkForModal(null);
-    lastInvokerRef.current?.focus();
-    lastInvokerRef.current = null;
+  const onAddToGalleryFromModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setReopenAfterSave(true);
+    setSaveOpen(true);
+    modal.close();
   };
 
-  // Global Esc guard (native <dialog> handles Esc, but we ensure parity)
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        e.stopPropagation();
-        close();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen]);
-
-  // Focus trap while the dialog is open (keyboard-only users)
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const dlg = dialogRef.current;
-    if (!dlg) return;
-
-    // Collect focusable controls inside the dialog
-    const focusables = Array.from(
-      dlg.querySelectorAll<HTMLElement>(
-        'a[href], area[href], input:not([disabled]), select:not([disabled]), ' +
-          'textarea:not([disabled]), button:not([disabled]), iframe, object, embed, ' +
-          '[contenteditable], [tabindex]:not([tabindex="-1"])'
-      )
-    ).filter((el) => el.offsetParent !== null || el === document.activeElement);
-
-    const first = focusables[0] ?? closeBtnRef.current ?? null;
-    const last = focusables[focusables.length - 1] ?? closeBtnRef.current ?? null;
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      if (!first || !last) return;
-
-      // Trap focus within the dialog
-      if (e.shiftKey) {
-        // Shift+Tab at first -> go to last
-        if (document.activeElement === first) {
-          e.preventDefault();
-          (last as HTMLElement).focus();
-        }
-      } else {
-        // Tab at last -> go to first
-        if (document.activeElement === last) {
-          e.preventDefault();
-          (first as HTMLElement).focus();
-        }
-      }
-    };
-
-    dlg.addEventListener('keydown', onKeyDown);
-    return () => {
-      dlg.removeEventListener('keydown', onKeyDown);
-    };
-  }, [isOpen, artworkForModal]);
-
-  // Safe external link (Source) only if clearly http(s)
-  const providerHref = useMemo(() => {
-    const url = artworkForModal?.objectUrl?.trim();
-    if (!url) return undefined;
-    try {
-      const u = new URL(url);
-      return u.protocol === 'http:' || u.protocol === 'https:' ? u.toString() : undefined;
-    } catch {
-      return undefined;
+  const handleSaveClose = () => {
+    setSaveOpen(false);
+    if (reopenAfterSave) {
+      setReopenAfterSave(false);
+      modal.open(addBtnRef.current);
     }
-  }, [artworkForModal]);
+  };
 
   if (!gallery) {
     return (
@@ -176,48 +201,89 @@ export default function GalleryPage() {
               padding: 0,
             }}
           >
-            {gallery.artworks.filter(hasDisplayImage).map((a: ArtworkLike) => {
-              const src = getDisplaySrc(a);
-              const onThumbClick: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
-                e.preventDefault();
-                open(a, e.currentTarget);
-              };
-              const onTitleClick: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
-                e.preventDefault();
-                open(a, e.currentTarget);
-              };
+            {gallery.artworks.map((a) => {
+              // Keep your original card structure; only add the exact same open behaviour as search
+              const canDisplay = hasDisplayImage(a);
+              const displaySrc = getDisplaySrc(a);
+              const providerHref: string | undefined = a.objectUrl ?? undefined;
+
+              // IDENTICAL thumbnail hardening to 500px as in search card
+              const thumbSrc = useMemo(
+                () => (displaySrc ? (buildSizedUrl(displaySrc, 500) ?? displaySrc) : undefined),
+                [displaySrc]
+              );
+
+              const titleText = a.title || 'Untitled';
 
               return (
                 <li key={a.id}>
                   <article data-artworkcard-context="gallery" className="art-card__gallery">
-                    {src ? (
-                      <a href="#" onClick={onThumbClick} aria-label="Open artwork locally">
+                    {canDisplay ? (
+                      <a href="#" onClick={onOpenFrom(a)} aria-label="Open artwork locally">
                         <SafeImage
-                          src={src}
-                          alt={`${a.title ?? 'Untitled'}${a.artist ? ` — ${a.artist}` : ''}`}
+                          src={thumbSrc!}
+                          alt={titleText}
+                          width={500} // retain your 500px convention
+                          style={{ height: 'auto' }}
+                          loading="lazy"
+                          decoding="async"
                         />
                       </a>
                     ) : (
-                      <div className="art-card__placeholder" aria-hidden="true" />
+                      <div
+                        className="art-card__noimage"
+                        role="img"
+                        aria-label="No image available"
+                        style={{ width: 240, height: 240 }}
+                      >
+                        <span className="art-card__noimage__label" aria-hidden="true">
+                          No image available
+                        </span>
+                        {providerHref && (
+                          <a
+                            className="art-card__noimage__provider"
+                            href={providerHref}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View on provider
+                          </a>
+                        )}
+                      </div>
                     )}
 
                     <h3 className="art-card__title">
-                      <a
-                        href="#"
-                        onClick={onTitleClick}
-                        aria-label="Open artwork locally from title"
-                      >
-                        {a.title ?? 'Untitled'}
-                      </a>
+                      {canDisplay ? (
+                        <a href="#" onClick={onOpenFrom(a)}>
+                          {titleText}
+                        </a>
+                      ) : (
+                        <span>{titleText}</span>
+                      )}
                     </h3>
 
-                    {a.objectUrl && (
-                      <p className="art-card__provider">
-                        <a href={a.objectUrl} target="_blank" rel="noopener noreferrer">
-                          Source Link
-                        </a>
-                      </p>
-                    )}
+                    <dl className="art-card__meta">
+                      <dt className="visually-hidden">Artist</dt>
+                      <dd className="art-card__artist">{a.artist || 'Unknown artist'}</dd>
+
+                      {a.date && (
+                        <>
+                          <dt className="visually-hidden">Date</dt>
+                          <dd className="art-card__date">{a.date}</dd>
+                        </>
+                      )}
+
+                      {providerHref && (
+                        <>
+                          <dt className="visually-hidden">Institution</dt>
+                          <dd className="art-card__institution">
+                            <a href={providerHref} target="_blank" rel="noreferrer">
+                              Courtesy of {a.institution || 'the provider'}
+                            </a>
+                          </dd>
+                        </>
+                      )}
+                    </dl>
                   </article>
                 </li>
               );
@@ -226,68 +292,88 @@ export default function GalleryPage() {
         </section>
       )}
 
-      {/* Modal with full content and a11y */}
-      <dialog
-        ref={dialogRef}
-        className="artwork__modal"
-        aria-labelledby={modalTitleId}
-        aria-describedby={modalDescId}
-      >
-        <form method="dialog">
-          <button ref={closeBtnRef} type="submit" onClick={close} aria-label="Close artwork view">
+      {/* Existing Save overlay (same sequential behaviour as search card) */}
+      {isSaveOpen && selected && (
+        <SaveToGalleryModal artwork={selected} onClose={handleSaveClose} />
+      )}
+
+      {/* ===== Artwork Modal (identical to ArtworkSearchCard) ===== */}
+      {modal.isOpen && selected && (
+        <dialog
+          className="artwork__modal"
+          ref={modal.dialogRef}
+          aria-labelledby="artwork-modal-title"
+          onClose={modal.handleClose}
+          onCancel={modal.handleCancel}
+        >
+          <button type="button" data-close onClick={modal.close} aria-label="Close modal">
             Close
           </button>
-        </form>
 
-        {artworkForModal && (
-          <article className="artwork__modal__content">
-            <figure style={{ margin: 0 }}>
-              {/* Image: request the best display variant available; SafeImage follows the same pathing as cards */}
-              {artworkForModal.id && (
-                <SafeImage
-                  src={getDisplaySrc(artworkForModal)}
-                  alt={`${artworkForModal.title ?? 'Untitled'}${
-                    artworkForModal.artist ? ` — ${artworkForModal.artist}` : ''
-                  }`}
-                  style={{ width: '100%', height: 'auto', display: 'block' }}
-                />
-              )}
-              <figcaption id={modalDescId} style={{ marginTop: '0.75rem' }}>
-                <h2 id={modalTitleId} style={{ margin: 0 }}>
-                  {artworkForModal.title ?? 'Untitled'}
-                </h2>
+          {(() => {
+            const displaySrc = getDisplaySrc(selected);
+            const requestedWidth = computeRequestedWidth();
+            const modalBaseUrl = pickModalBaseUrl(selected, displaySrc);
+            const modalImageSrc = buildSizedUrl(modalBaseUrl, requestedWidth);
+            const titleText = selected.title || 'Untitled';
+            const providerHref: string | undefined = selected.objectUrl ?? undefined;
 
-                {/* Optional fields displayed only when present */}
-                {artworkForModal.artist && (
-                  <p className="artwork__artist" style={{ margin: '0.25rem 0' }}>
-                    {artworkForModal.artist}
-                  </p>
+            return (
+              <>
+                {/* Image (separate high-res request), never a link */}
+                {modalImageSrc && (
+                  <SafeImage
+                    className="artwork__image"
+                    src={modalImageSrc}
+                    alt={`${titleText} — ${selected.artist || 'Unknown'}`}
+                    width={requestedWidth}
+                    decoding="async"
+                    style={{ width: '100%', height: 'auto', display: 'block' }}
+                    sizes="100vw"
+                  />
                 )}
 
-                {artworkForModal.date && (
-                  <p className="artwork__date" style={{ margin: '0.25rem 0' }}>
-                    {artworkForModal.date}
-                  </p>
+                {/* Title */}
+                <h1 id="artwork-modal-title" className="artwork__title">
+                  {titleText}
+                </h1>
+
+                {/* Artist */}
+                {selected.artist && <p className="artwork__artist">{selected.artist}</p>}
+
+                {/* Date */}
+                {selected.date && <p className="artwork__date">{selected.date}</p>}
+
+                {/* Institution (no link) */}
+                {selected.institution && (
+                  <p className="artwork__institution">Courtesy of {selected.institution}</p>
                 )}
 
-                {artworkForModal.institution && (
-                  <p className="artwork__institution" style={{ margin: '0.25rem 0' }}>
-                    {artworkForModal.institution}
-                  </p>
-                )}
-
-                {providerHref && (
-                  <p className="artwork__source" style={{ margin: '0.5rem 0 0 0' }}>
-                    <a href={providerHref} target="_blank" rel="noopener noreferrer">
-                      Source Link
-                    </a>
-                  </p>
-                )}
-              </figcaption>
-            </figure>
-          </article>
-        )}
-      </dialog>
+                {/* Source link + Add to Gallery (sequential modals) */}
+                <ul>
+                  {providerHref && (
+                    <li className="artwork-object_url">
+                      <a href={providerHref} target="_blank" rel="noopener noreferrer">
+                        Source Link
+                      </a>
+                    </li>
+                  )}
+                  <li>
+                    <button
+                      ref={addBtnRef}
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={onAddToGalleryFromModal}
+                    >
+                      Copy to Another Gallery
+                    </button>
+                  </li>
+                </ul>
+              </>
+            );
+          })()}
+        </dialog>
+      )}
     </main>
   );
 }
