@@ -1,13 +1,73 @@
 // src/pages/GalleryPage.tsx
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { SafeImage } from '../components/SafeImage';
 import { useGalleryStore } from '../store/galleryStore';
 import { getDisplaySrc, hasDisplayImage } from '../utils/getDisplaySrc';
 
+/**
+ * Phase 0.3.6 — minimal modal content
+ * - Uses artworkForModal for image, title, artist
+ * - Removes ESLint disable
+ * - Keeps all 0.3.5 wiring (open/close/focus restore)
+ */
+
+type ArtworkLike = {
+  id: string;
+  title?: string;
+  artist?: string;
+  date?: string;
+  institution?: string;
+  objectUrl?: string;
+};
+
 export default function GalleryPage() {
   const { id } = useParams();
   const { getGallery } = useGalleryStore();
   const gallery = id ? getGallery(id) : undefined;
+
+  // --- Modal wiring (file-local) ---
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const lastInvokerRef = useRef<HTMLElement | null>(null);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [artworkForModal, setArtworkForModal] = useState<ArtworkLike | null>(null);
+
+  const open = (art: ArtworkLike, invoker: HTMLElement | null) => {
+    setArtworkForModal(art);
+    lastInvokerRef.current = invoker;
+    const dlg = dialogRef.current;
+    if (dlg && typeof dlg.showModal === 'function') {
+      dlg.showModal();
+      setIsOpen(true);
+      queueMicrotask(() => {
+        closeBtnRef.current?.focus();
+      });
+    }
+  };
+
+  const close = () => {
+    const dlg = dialogRef.current;
+    if (dlg && typeof dlg.close === 'function') {
+      dlg.close();
+    }
+    setIsOpen(false);
+    lastInvokerRef.current?.focus();
+    lastInvokerRef.current = null;
+    setArtworkForModal(null);
+  };
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        e.stopPropagation();
+        close();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen]);
 
   if (!gallery) {
     return (
@@ -19,13 +79,6 @@ export default function GalleryPage() {
       </main>
     );
   }
-
-  const openLocal = (e: React.MouseEvent) => {
-    e.preventDefault();
-    // Intentionally a no-op for now (modal deferred)
-
-    console.debug('openLocal (stub)');
-  };
 
   return (
     <main>
@@ -58,65 +111,50 @@ export default function GalleryPage() {
               padding: 0,
             }}
           >
-            {gallery.artworks.filter(hasDisplayImage).map((a) => {
+            {gallery.artworks.filter(hasDisplayImage).map((a: ArtworkLike) => {
               const src = getDisplaySrc(a);
               const providerHref: string | undefined = a.objectUrl ?? undefined;
+
+              const onThumbClick: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
+                e.preventDefault();
+                open(a, e.currentTarget);
+              };
+              const onTitleClick: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
+                e.preventDefault();
+                open(a, e.currentTarget);
+              };
 
               return (
                 <li key={a.id}>
                   <article data-artworkcard-context="gallery" className="art-card__gallery">
                     {src ? (
-                      <a href="#" onClick={openLocal} aria-label="Open artwork locally">
+                      <a href="#" onClick={onThumbClick} aria-label="Open artwork locally">
                         <SafeImage
                           src={src}
-                          alt={`${a.title} — ${a.artist}`}
-                          width={500} // 500 px intrinsic thumbnail convention
-                          style={{ height: 'auto' }}
-                          loading="lazy"
-                          decoding="async"
+                          alt={`${a.title ?? 'Untitled'}${a.artist ? ` — ${a.artist}` : ''}`}
                         />
                       </a>
                     ) : (
-                      <div
-                        className="art-card__noimage"
-                        role="img"
-                        aria-label="No image available"
-                        style={{ width: 240, height: 240 }}
-                      >
-                        <span className="art-card__noimage__label" aria-hidden="true">
-                          No image available
-                        </span>
-                      </div>
+                      <div className="art-card__placeholder" aria-hidden="true" />
                     )}
 
                     <h3 className="art-card__title">
-                      <a href="#" onClick={openLocal}>
-                        {a.title || 'Untitled'}
+                      <a
+                        href="#"
+                        onClick={onTitleClick}
+                        aria-label="Open artwork locally from title"
+                      >
+                        {a.title ?? 'Untitled'}
                       </a>
                     </h3>
 
-                    <dl className="art-card__meta">
-                      <dt className="visually-hidden">Artist</dt>
-                      <dd className="art-card__artist">{a.artist || 'Unknown artist'}</dd>
-
-                      {a.date && (
-                        <>
-                          <dt className="visually-hidden">Date</dt>
-                          <dd className="art-card__date">{a.date}</dd>
-                        </>
-                      )}
-
-                      {providerHref && (
-                        <>
-                          <dt className="visually-hidden">Institution</dt>
-                          <dd className="art-card__institution">
-                            <a href={providerHref} target="_blank" rel="noreferrer">
-                              Courtesy of {a.institution || 'the provider'}
-                            </a>
-                          </dd>
-                        </>
-                      )}
-                    </dl>
+                    {providerHref && (
+                      <p className="art-card__provider">
+                        <a href={providerHref} target="_blank" rel="noopener noreferrer">
+                          Source Link
+                        </a>
+                      </p>
+                    )}
                   </article>
                 </li>
               );
@@ -124,6 +162,34 @@ export default function GalleryPage() {
           </ul>
         </section>
       )}
+
+      {/* Modal with minimal content */}
+      <dialog ref={dialogRef} className="artwork__modal" aria-labelledby="artwork-modal-title">
+        <form method="dialog">
+          <button ref={closeBtnRef} type="submit" onClick={close} aria-label="Close artwork view">
+            Close
+          </button>
+        </form>
+
+        {artworkForModal && (
+          <figure className="artwork__modal__content">
+            {artworkForModal.id && (
+              <SafeImage
+                src={getDisplaySrc(artworkForModal)}
+                alt={`${artworkForModal.title ?? 'Untitled'}${
+                  artworkForModal.artist ? ` — ${artworkForModal.artist}` : ''
+                }`}
+              />
+            )}
+            <figcaption>
+              <h2 id="artwork-modal-title">{artworkForModal.title ?? 'Untitled'}</h2>
+              {artworkForModal.artist && (
+                <p className="artwork__artist">{artworkForModal.artist}</p>
+              )}
+            </figcaption>
+          </figure>
+        )}
+      </dialog>
     </main>
   );
 }
