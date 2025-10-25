@@ -53,8 +53,18 @@ jobs:
       - name: Run tests
         run: npm run test -- --coverage
 
+      - name: Run a11y (unit)
+        run: npm run test:a11y
+        continue-on-error: true
+
       - name: Build project
         run: npm run build
+
+      # NOTE: E2E accessibility moved to a separate job below.
+      # Removed:
+      # - Start preview server
+      # - Install Playwright
+      # - Run a11y E2E
 
       - name: Upload coverage to Codecov (optional)
         uses: codecov/codecov-action@v3
@@ -64,3 +74,38 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
+
+  a11y-e2e:
+    name: Accessibility E2E (axe via Playwright)
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      # ---- SAFE INSTALL SECTION (mirrors test job) ----
+      - name: Install dependencies (safe mode for forks)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork }}
+        run: npm ci --ignore-scripts
+
+      - name: Install dependencies
+        if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
+        run: npm ci
+      # ---- END SAFE INSTALL SECTION ----
+
+      - name: Build app
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E accessibility tests (non-blocking initially)
+        run: npm run test:e2e:a11y
+        continue-on-error: true

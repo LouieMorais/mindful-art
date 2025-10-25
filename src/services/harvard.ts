@@ -36,7 +36,7 @@ const HarvardResponseSchema = z.object({
 
 export async function searchHarvard(
   query: string,
-  limit = 24
+  limit = 70
 ): Promise<{ items: Artwork[]; warning?: string }> {
   if (!HARVARD_KEY) {
     return {
