@@ -16,6 +16,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:a11y": "jest --testMatch \"**/*.a11y.test.(ts|tsx)\"",
+    "test:e2e:a11y": "playwright test -c playwright.a11y.config.ts",
+    "e2e:install": "playwright install --with-deps",
     "audit:production": "npm audit --production"
   },
   "lint-staged": {
