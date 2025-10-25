@@ -1,15 +1,16 @@
 // src/pages/GalleryPage.tsx
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { SafeImage } from '../components/SafeImage';
 import { useGalleryStore } from '../store/galleryStore';
 import { getDisplaySrc, hasDisplayImage } from '../utils/getDisplaySrc';
 
 /**
- * Phase 0.3.6 — minimal modal content
- * - Uses artworkForModal for image, title, artist
- * - Removes ESLint disable
- * - Keeps all 0.3.5 wiring (open/close/focus restore)
+ * Phase 0.3.7 — Full modal content + a11y/resilience
+ * - Modal shows: image (max available), title, artist, date, institution, Source Link
+ * - a11y: aria-labelledby/aria-describedby, focus trap, focus return, Esc close
+ * - Resilience: all fields optional; Source Link only if safe URL present
+ * - No shared component extraction; all state remains local and reversible
  */
 
 type ArtworkLike = {
@@ -18,7 +19,7 @@ type ArtworkLike = {
   artist?: string;
   date?: string;
   institution?: string;
-  objectUrl?: string;
+  objectUrl?: string; // external source page
 };
 
 export default function GalleryPage() {
@@ -26,7 +27,7 @@ export default function GalleryPage() {
   const { getGallery } = useGalleryStore();
   const gallery = id ? getGallery(id) : undefined;
 
-  // --- Modal wiring (file-local) ---
+  // --- Modal state (file-local) ---
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
   const lastInvokerRef = useRef<HTMLElement | null>(null);
@@ -34,9 +35,15 @@ export default function GalleryPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [artworkForModal, setArtworkForModal] = useState<ArtworkLike | null>(null);
 
+  // For labelling/description
+  const modalTitleId = 'artwork-modal-title';
+  const modalDescId = 'artwork-modal-desc';
+
+  // Open/Close
   const open = (art: ArtworkLike, invoker: HTMLElement | null) => {
     setArtworkForModal(art);
     lastInvokerRef.current = invoker;
+
     const dlg = dialogRef.current;
     if (dlg && typeof dlg.showModal === 'function') {
       dlg.showModal();
@@ -53,11 +60,12 @@ export default function GalleryPage() {
       dlg.close();
     }
     setIsOpen(false);
+    setArtworkForModal(null);
     lastInvokerRef.current?.focus();
     lastInvokerRef.current = null;
-    setArtworkForModal(null);
   };
 
+  // Global Esc guard (native <dialog> handles Esc, but we ensure parity)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -68,6 +76,63 @@ export default function GalleryPage() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen]);
+
+  // Focus trap while the dialog is open (keyboard-only users)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const dlg = dialogRef.current;
+    if (!dlg) return;
+
+    // Collect focusable controls inside the dialog
+    const focusables = Array.from(
+      dlg.querySelectorAll<HTMLElement>(
+        'a[href], area[href], input:not([disabled]), select:not([disabled]), ' +
+          'textarea:not([disabled]), button:not([disabled]), iframe, object, embed, ' +
+          '[contenteditable], [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+
+    const first = focusables[0] ?? closeBtnRef.current ?? null;
+    const last = focusables[focusables.length - 1] ?? closeBtnRef.current ?? null;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      if (!first || !last) return;
+
+      // Trap focus within the dialog
+      if (e.shiftKey) {
+        // Shift+Tab at first -> go to last
+        if (document.activeElement === first) {
+          e.preventDefault();
+          (last as HTMLElement).focus();
+        }
+      } else {
+        // Tab at last -> go to first
+        if (document.activeElement === last) {
+          e.preventDefault();
+          (first as HTMLElement).focus();
+        }
+      }
+    };
+
+    dlg.addEventListener('keydown', onKeyDown);
+    return () => {
+      dlg.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isOpen, artworkForModal]);
+
+  // Safe external link (Source) only if clearly http(s)
+  const providerHref = useMemo(() => {
+    const url = artworkForModal?.objectUrl?.trim();
+    if (!url) return undefined;
+    try {
+      const u = new URL(url);
+      return u.protocol === 'http:' || u.protocol === 'https:' ? u.toString() : undefined;
+    } catch {
+      return undefined;
+    }
+  }, [artworkForModal]);
 
   if (!gallery) {
     return (
@@ -113,8 +178,6 @@ export default function GalleryPage() {
           >
             {gallery.artworks.filter(hasDisplayImage).map((a: ArtworkLike) => {
               const src = getDisplaySrc(a);
-              const providerHref: string | undefined = a.objectUrl ?? undefined;
-
               const onThumbClick: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
                 e.preventDefault();
                 open(a, e.currentTarget);
@@ -148,9 +211,9 @@ export default function GalleryPage() {
                       </a>
                     </h3>
 
-                    {providerHref && (
+                    {a.objectUrl && (
                       <p className="art-card__provider">
-                        <a href={providerHref} target="_blank" rel="noopener noreferrer">
+                        <a href={a.objectUrl} target="_blank" rel="noopener noreferrer">
                           Source Link
                         </a>
                       </p>
@@ -163,8 +226,13 @@ export default function GalleryPage() {
         </section>
       )}
 
-      {/* Modal with minimal content */}
-      <dialog ref={dialogRef} className="artwork__modal" aria-labelledby="artwork-modal-title">
+      {/* Modal with full content and a11y */}
+      <dialog
+        ref={dialogRef}
+        className="artwork__modal"
+        aria-labelledby={modalTitleId}
+        aria-describedby={modalDescId}
+      >
         <form method="dialog">
           <button ref={closeBtnRef} type="submit" onClick={close} aria-label="Close artwork view">
             Close
@@ -172,22 +240,52 @@ export default function GalleryPage() {
         </form>
 
         {artworkForModal && (
-          <figure className="artwork__modal__content">
-            {artworkForModal.id && (
-              <SafeImage
-                src={getDisplaySrc(artworkForModal)}
-                alt={`${artworkForModal.title ?? 'Untitled'}${
-                  artworkForModal.artist ? ` — ${artworkForModal.artist}` : ''
-                }`}
-              />
-            )}
-            <figcaption>
-              <h2 id="artwork-modal-title">{artworkForModal.title ?? 'Untitled'}</h2>
-              {artworkForModal.artist && (
-                <p className="artwork__artist">{artworkForModal.artist}</p>
+          <article className="artwork__modal__content">
+            <figure style={{ margin: 0 }}>
+              {/* Image: request the best display variant available; SafeImage follows the same pathing as cards */}
+              {artworkForModal.id && (
+                <SafeImage
+                  src={getDisplaySrc(artworkForModal)}
+                  alt={`${artworkForModal.title ?? 'Untitled'}${
+                    artworkForModal.artist ? ` — ${artworkForModal.artist}` : ''
+                  }`}
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
               )}
-            </figcaption>
-          </figure>
+              <figcaption id={modalDescId} style={{ marginTop: '0.75rem' }}>
+                <h2 id={modalTitleId} style={{ margin: 0 }}>
+                  {artworkForModal.title ?? 'Untitled'}
+                </h2>
+
+                {/* Optional fields displayed only when present */}
+                {artworkForModal.artist && (
+                  <p className="artwork__artist" style={{ margin: '0.25rem 0' }}>
+                    {artworkForModal.artist}
+                  </p>
+                )}
+
+                {artworkForModal.date && (
+                  <p className="artwork__date" style={{ margin: '0.25rem 0' }}>
+                    {artworkForModal.date}
+                  </p>
+                )}
+
+                {artworkForModal.institution && (
+                  <p className="artwork__institution" style={{ margin: '0.25rem 0' }}>
+                    {artworkForModal.institution}
+                  </p>
+                )}
+
+                {providerHref && (
+                  <p className="artwork__source" style={{ margin: '0.5rem 0 0 0' }}>
+                    <a href={providerHref} target="_blank" rel="noopener noreferrer">
+                      Source Link
+                    </a>
+                  </p>
+                )}
+              </figcaption>
+            </figure>
+          </article>
         )}
       </dialog>
     </main>
