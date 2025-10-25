@@ -77,7 +77,7 @@ export const mapRijksItemToArtwork = (o: z.infer<typeof RijksItemSchema>): Artwo
 
 export async function searchRijksmuseum(
   query: string,
-  limit = 24
+  limit = 70
 ): Promise<{ items: Artwork[]; warning?: string }> {
   if (!RIJKS_KEY) {
     return {

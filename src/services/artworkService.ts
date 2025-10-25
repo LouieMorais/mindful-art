@@ -14,7 +14,7 @@ export interface SearchResult {
  * - Flattens and returns all validated Artwork items.
  * - Collects provider warnings without failing the whole search.
  */
-export async function searchArtworks(query: string, limitPerProvider = 24): Promise<SearchResult> {
+export async function searchArtworks(query: string, limitPerProvider = 70): Promise<SearchResult> {
   const [rijks, harvard] = await Promise.all([
     searchRijksmuseum(query, limitPerProvider),
     searchHarvard(query, limitPerProvider),
