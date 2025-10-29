@@ -1,3 +1,4 @@
+// src/components/ui/__tests__/LoadingSpinner.a11y.test.tsx
 import { render } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import LoadingSpinner from '../LoadingSpinner';
