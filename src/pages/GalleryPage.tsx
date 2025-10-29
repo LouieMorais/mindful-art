@@ -1,10 +1,9 @@
 // src/pages/GalleryPage.tsx
 /**
  * Gallery page:
- * - Renders a list of artworks in a gallery.
- * - SECURITY HARDENING: all external links now use toSafeHttpUrl() before rendering.
- *   This eliminates DOM-based XSS via dynamic href values (Snyk CWE-79 alerts).
- *   No behavioural changes beyond link hardening.
+ * - Renders a list of artworks in a gallery
+ * - All external links are hardened with toSafeHttpUrl from src/utils/sanitiseHtml.ts
+ *   and rendered only if a safe http/https URL is returned.
  */
 
 import React, { useState, useRef, useMemo } from 'react';
@@ -16,7 +15,7 @@ import SaveToGalleryModal from '../components/modals/SaveToGalleryModal';
 import type { Artwork } from '../types/artwork';
 import { toSafeHttpUrl } from '../utils/sanitiseHtml';
 
-/* ---------------- helpers (unchanged) ---------------- */
+/* ---------------- helpers (kept as in your code) ---------------- */
 
 function computeRequestedWidth(): number {
   if (typeof window === 'undefined') return 1000;
@@ -153,8 +152,7 @@ export default function GalleryPage() {
               const canDisplay = hasDisplayImage(a);
               const displaySrc = getDisplaySrc(a);
 
-              // HARDEN: compute a sanitised external URL once per artwork.
-              // Only http/https survive; unsafe or invalid values become undefined.
+              // HARDEN: normalise once, then use the safe value for all anchors
               const providerHrefRaw: string | undefined = a.objectUrl ?? undefined;
               const providerHref: string | undefined =
                 (providerHrefRaw && toSafeHttpUrl(providerHrefRaw)) || undefined;
@@ -191,7 +189,7 @@ export default function GalleryPage() {
                           No image available
                         </span>
 
-                        {/* SAFE external link (formerly: href={providerHrefRaw}) */}
+                        {/* SAFE: only render link when toSafeHttpUrl(...) returns a value */}
                         {providerHref && (
                           <a
                             className="art-card__noimage__provider"
@@ -226,7 +224,7 @@ export default function GalleryPage() {
                         </>
                       )}
 
-                      {/* SAFE external link (formerly: href={providerHrefRaw}) */}
+                      {/* SAFE: institution link */}
                       {providerHref && (
                         <>
                           <dt className="visually-hidden">Institution</dt>
@@ -271,7 +269,7 @@ export default function GalleryPage() {
             const modalImageSrc = buildSizedUrl(modalBaseUrl, requestedWidth);
             const titleText = selected.title || 'Untitled';
 
-            // HARDEN: sanitise providerHref for the modal too.
+            // HARDEN (modal): compute safe provider link for the selected artwork
             const providerHrefRaw: string | undefined = selected.objectUrl ?? undefined;
             const providerHref: string | undefined =
               (providerHrefRaw && toSafeHttpUrl(providerHrefRaw)) || undefined;
@@ -301,7 +299,7 @@ export default function GalleryPage() {
                 )}
 
                 <ul>
-                  {/* SAFE external link (formerly: href={providerHrefRaw}) */}
+                  {/* SAFE: Source Link */}
                   {providerHref && (
                     <li className="artwork-object_url">
                       <a href={providerHref} target="_blank" rel="noopener noreferrer">
@@ -329,10 +327,11 @@ export default function GalleryPage() {
   );
 }
 
-/* local modal hook (unchanged behaviour) */
+/* ---------------- local modal hook (kept as in your code) ---------------- */
 function useArtworkModal() {
   const dialogRef = React.useRef<HTMLDialogElement | null>(null);
   const [isOpen, setOpen] = React.useState(false);
+
   const open = React.useCallback((invoker?: HTMLElement | null) => {
     dialogRef.current?.showModal();
     setOpen(true);
@@ -341,13 +340,16 @@ function useArtworkModal() {
       dialogRef.current?.querySelector<HTMLButtonElement>('button[data-close]')?.focus();
     }, 0);
   }, []);
+
   const close = React.useCallback(() => {
     const invoker = (dialogRef.current as any)?.__invoker as HTMLElement | undefined;
     dialogRef.current?.close();
     setOpen(false);
     if (invoker && typeof invoker.focus === 'function') setTimeout(() => invoker.focus(), 0);
   }, []);
+
   const handleClose = React.useCallback(() => close(), [close]);
+
   const handleCancel = React.useCallback(
     (e: React.SyntheticEvent<HTMLDialogElement, Event>) => {
       e.preventDefault();
@@ -355,5 +357,6 @@ function useArtworkModal() {
     },
     [close]
   );
+
   return { dialogRef, isOpen, open, close, handleClose, handleCancel };
 }
