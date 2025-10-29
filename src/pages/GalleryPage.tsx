@@ -7,6 +7,7 @@ import { useGalleryStore } from '../store/galleryStore';
 import { getDisplaySrc, hasDisplayImage } from '../utils/getDisplaySrc';
 import SaveToGalleryModal from '../components/modals/SaveToGalleryModal';
 import type { Artwork } from '../types/artwork';
+import { toSafeHttpUrl } from '../utils/sanitiseHtml';
 
 /**
  * Gallery page rendering remains as before.
@@ -192,20 +193,16 @@ export default function GalleryPage() {
         </section>
       ) : (
         <section aria-label="Artworks">
-          <ul
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1rem',
-              listStyle: 'none',
-              padding: 0,
-            }}
-          >
+          <ul>
             {gallery.artworks.map((a) => {
               // Keep your original card structure; only add the exact same open behaviour as search
               const canDisplay = hasDisplayImage(a);
               const displaySrc = getDisplaySrc(a);
-              const providerHref: string | undefined = a.objectUrl ?? undefined;
+
+              // Harden once per item
+              const providerHrefRaw: string | undefined = a.objectUrl ?? undefined;
+              const providerHref: string | undefined =
+                (providerHrefRaw && toSafeHttpUrl(providerHrefRaw)) || undefined;
 
               // IDENTICAL thumbnail hardening to 500px as in search card
               const thumbSrc = useMemo(
@@ -316,7 +313,11 @@ export default function GalleryPage() {
             const modalBaseUrl = pickModalBaseUrl(selected, displaySrc);
             const modalImageSrc = buildSizedUrl(modalBaseUrl, requestedWidth);
             const titleText = selected.title || 'Untitled';
-            const providerHref: string | undefined = selected.objectUrl ?? undefined;
+
+            // Harden external link once at render time
+            const providerHrefRaw: string | undefined = selected.objectUrl ?? undefined;
+            const providerHref: string | undefined =
+              (providerHrefRaw && toSafeHttpUrl(providerHrefRaw)) || undefined;
 
             return (
               <>

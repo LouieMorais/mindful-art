@@ -16,6 +16,7 @@ import { SafeImage } from '../SafeImage';
 import { getDisplaySrc, hasDisplayImage } from '../../utils/getDisplaySrc';
 import type { Artwork } from '../../types/artwork';
 import SaveToGalleryModal from '../modals/SaveToGalleryModal';
+import { toSafeHttpUrl } from '../../utils/sanitiseHtml';
 
 type Props = { artwork: Artwork };
 
@@ -137,7 +138,11 @@ const ArtworkSearchCard: React.FC<Props> = ({ artwork }) => {
   // CARD THUMBNAIL: get base display src
   const canDisplay = hasDisplayImage(artwork);
   const displaySrc = getDisplaySrc(artwork); // may be 500px or a base IIIF URL depending on provider
-  const providerHref: string | undefined = artwork.objectUrl ?? undefined;
+
+  // Harden external link once at render time
+  const providerHrefRaw: string | undefined = artwork.objectUrl ?? undefined;
+  const providerHref: string | undefined =
+    (providerHrefRaw && toSafeHttpUrl(providerHrefRaw)) || undefined;
 
   // --- HARDEN THUMBNAIL SIZE TO 500px (fixes Rijks full-res thumbnails) ---
   const thumbSrc = useMemo(
