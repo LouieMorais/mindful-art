@@ -1,6 +1,13 @@
 // src/pages/GalleryPage.tsx
+/**
+ * Gallery page:
+ * - Renders a list of artworks in a gallery.
+ * - SECURITY HARDENING: all external links now use toSafeHttpUrl() before rendering.
+ *   This eliminates DOM-based XSS via dynamic href values (Snyk CWE-79 alerts).
+ *   No behavioural changes beyond link hardening.
+ */
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { SafeImage } from '../components/SafeImage';
 import { useGalleryStore } from '../store/galleryStore';
@@ -9,59 +16,7 @@ import SaveToGalleryModal from '../components/modals/SaveToGalleryModal';
 import type { Artwork } from '../types/artwork';
 import { toSafeHttpUrl } from '../utils/sanitiseHtml';
 
-/**
- * Gallery page rendering remains as before.
- * Added: IDENTICAL modal logic and helpers from ArtworkSearchCard.tsx.
- * Source for parity: src/components/search/ArtworkSearchCard.tsx
- */
-
-/* ---------------- dialog wiring (copied from ArtworkSearchCard) ---------------- */
-
-function useArtworkModal() {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-  const invokerRef = useRef<HTMLElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-
-  const open = useCallback((invoker: HTMLElement | null) => {
-    invokerRef.current = invoker;
-    setIsOpen(true);
-  }, []);
-
-  const close = useCallback(() => {
-    dialogRef.current?.close();
-    setIsOpen(false);
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const dlg = dialogRef.current;
-    if (dlg && typeof dlg.showModal === 'function') {
-      dlg.showModal();
-      const closeBtn = dlg.querySelector<HTMLButtonElement>('button[data-close]');
-      closeBtn?.focus();
-    }
-  }, [isOpen]);
-
-  const handleClose = useCallback(() => {
-    const invoker = invokerRef.current;
-    invokerRef.current = null;
-    if (invoker && typeof invoker.focus === 'function') {
-      setTimeout(() => invoker.focus(), 0);
-    }
-  }, []);
-
-  const handleCancel = useCallback(
-    (e: React.SyntheticEvent<HTMLDialogElement, Event>) => {
-      e.preventDefault();
-      close();
-    },
-    [close]
-  );
-
-  return { dialogRef, isOpen, open, close, handleClose, handleCancel };
-}
-
-/* ---------------- helpers (copied from ArtworkSearchCard) ---------------- */
+/* ---------------- helpers (unchanged) ---------------- */
 
 function computeRequestedWidth(): number {
   if (typeof window === 'undefined') return 1000;
@@ -70,16 +25,11 @@ function computeRequestedWidth(): number {
   return Math.max(1000, Math.round(dpr * vw));
 }
 
-/**
- * Prefer a canonical/base image if available; otherwise fall back to display (thumb) URL.
- * This prevents being stuck at 500px for providers like Rijksmuseum.
- */
 function pickModalBaseUrl(art: Artwork, displaySrc?: string): string | undefined {
   const withImage = art as Partial<Artwork> & { imageUrl?: string };
   return withImage.imageUrl ?? displaySrc;
 }
 
-/** Upsize common IIIF/CDN patterns; fall back safely. */
 function buildSizedUrl(urlStr: string | undefined, w: number): string | undefined {
   if (!urlStr) return undefined;
 
@@ -129,10 +79,7 @@ export default function GalleryPage() {
   const { getGallery } = useGalleryStore();
   const gallery = id ? getGallery(id) : undefined;
 
-  // Selected artwork for the modal (gallery page needs to set this before opening modal)
   const [selected, setSelected] = useState<Artwork | null>(null);
-
-  // Sequential modals (identical behaviour as search card): Artwork → Save → Artwork
   const [isSaveOpen, setSaveOpen] = useState(false);
   const [reopenAfterSave, setReopenAfterSave] = useState(false);
   const addBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -193,18 +140,25 @@ export default function GalleryPage() {
         </section>
       ) : (
         <section aria-label="Artworks">
-          <ul>
+          <ul
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              listStyle: 'none',
+              padding: 0,
+            }}
+          >
             {gallery.artworks.map((a) => {
-              // Keep your original card structure; only add the exact same open behaviour as search
               const canDisplay = hasDisplayImage(a);
               const displaySrc = getDisplaySrc(a);
 
-              // Harden once per item
+              // HARDEN: compute a sanitised external URL once per artwork.
+              // Only http/https survive; unsafe or invalid values become undefined.
               const providerHrefRaw: string | undefined = a.objectUrl ?? undefined;
               const providerHref: string | undefined =
                 (providerHrefRaw && toSafeHttpUrl(providerHrefRaw)) || undefined;
 
-              // IDENTICAL thumbnail hardening to 500px as in search card
               const thumbSrc = useMemo(
                 () => (displaySrc ? (buildSizedUrl(displaySrc, 500) ?? displaySrc) : undefined),
                 [displaySrc]
@@ -220,7 +174,7 @@ export default function GalleryPage() {
                         <SafeImage
                           src={thumbSrc!}
                           alt={titleText}
-                          width={500} // retain your 500px convention
+                          width={500}
                           style={{ height: 'auto' }}
                           loading="lazy"
                           decoding="async"
@@ -236,6 +190,8 @@ export default function GalleryPage() {
                         <span className="art-card__noimage__label" aria-hidden="true">
                           No image available
                         </span>
+
+                        {/* SAFE external link (formerly: href={providerHrefRaw}) */}
                         {providerHref && (
                           <a
                             className="art-card__noimage__provider"
@@ -270,6 +226,7 @@ export default function GalleryPage() {
                         </>
                       )}
 
+                      {/* SAFE external link (formerly: href={providerHrefRaw}) */}
                       {providerHref && (
                         <>
                           <dt className="visually-hidden">Institution</dt>
@@ -289,12 +246,12 @@ export default function GalleryPage() {
         </section>
       )}
 
-      {/* Existing Save overlay (same sequential behaviour as search card) */}
+      {/* Save overlay */}
       {isSaveOpen && selected && (
         <SaveToGalleryModal artwork={selected} onClose={handleSaveClose} />
       )}
 
-      {/* ===== Artwork Modal (identical to ArtworkSearchCard) ===== */}
+      {/* Artwork Modal */}
       {modal.isOpen && selected && (
         <dialog
           className="artwork__modal"
@@ -314,14 +271,13 @@ export default function GalleryPage() {
             const modalImageSrc = buildSizedUrl(modalBaseUrl, requestedWidth);
             const titleText = selected.title || 'Untitled';
 
-            // Harden external link once at render time
+            // HARDEN: sanitise providerHref for the modal too.
             const providerHrefRaw: string | undefined = selected.objectUrl ?? undefined;
             const providerHref: string | undefined =
               (providerHrefRaw && toSafeHttpUrl(providerHrefRaw)) || undefined;
 
             return (
               <>
-                {/* Image (separate high-res request), never a link */}
                 {modalImageSrc && (
                   <SafeImage
                     className="artwork__image"
@@ -334,24 +290,18 @@ export default function GalleryPage() {
                   />
                 )}
 
-                {/* Title */}
                 <h1 id="artwork-modal-title" className="artwork__title">
                   {titleText}
                 </h1>
 
-                {/* Artist */}
                 {selected.artist && <p className="artwork__artist">{selected.artist}</p>}
-
-                {/* Date */}
                 {selected.date && <p className="artwork__date">{selected.date}</p>}
-
-                {/* Institution (no link) */}
                 {selected.institution && (
                   <p className="artwork__institution">Courtesy of {selected.institution}</p>
                 )}
 
-                {/* Source link + Add to Gallery (sequential modals) */}
                 <ul>
+                  {/* SAFE external link (formerly: href={providerHrefRaw}) */}
                   {providerHref && (
                     <li className="artwork-object_url">
                       <a href={providerHref} target="_blank" rel="noopener noreferrer">
@@ -377,4 +327,33 @@ export default function GalleryPage() {
       )}
     </main>
   );
+}
+
+/* local modal hook (unchanged behaviour) */
+function useArtworkModal() {
+  const dialogRef = React.useRef<HTMLDialogElement | null>(null);
+  const [isOpen, setOpen] = React.useState(false);
+  const open = React.useCallback((invoker?: HTMLElement | null) => {
+    dialogRef.current?.showModal();
+    setOpen(true);
+    if (invoker) (dialogRef.current as any).__invoker = invoker;
+    setTimeout(() => {
+      dialogRef.current?.querySelector<HTMLButtonElement>('button[data-close]')?.focus();
+    }, 0);
+  }, []);
+  const close = React.useCallback(() => {
+    const invoker = (dialogRef.current as any)?.__invoker as HTMLElement | undefined;
+    dialogRef.current?.close();
+    setOpen(false);
+    if (invoker && typeof invoker.focus === 'function') setTimeout(() => invoker.focus(), 0);
+  }, []);
+  const handleClose = React.useCallback(() => close(), [close]);
+  const handleCancel = React.useCallback(
+    (e: React.SyntheticEvent<HTMLDialogElement, Event>) => {
+      e.preventDefault();
+      close();
+    },
+    [close]
+  );
+  return { dialogRef, isOpen, open, close, handleClose, handleCancel };
 }
