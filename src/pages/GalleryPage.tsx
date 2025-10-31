@@ -7,6 +7,7 @@ import { useGalleryStore } from '../store/galleryStore';
 import { getDisplaySrc, hasDisplayImage } from '../utils/getDisplaySrc';
 import SaveToGalleryModal from '../components/modals/SaveToGalleryModal';
 import type { Artwork } from '../types/artwork';
+import { toSafeHttpUrl } from '../utils/sanitiseHtml';
 
 /**
  * Gallery page rendering remains as before.
@@ -197,8 +198,12 @@ export default function GalleryPage() {
               // Keep your original card structure; only add the exact same open behaviour as search
               const canDisplay = hasDisplayImage(a);
               const displaySrc = getDisplaySrc(a);
+              // Pull the raw provider URL from the artwork
               const providerHref: string | undefined = a.objectUrl ?? undefined;
-
+              // Sanitise it: returns undefined if the URL isn’t http/https
+              const safeProviderHref: string | undefined = providerHref
+                ? (toSafeHttpUrl(providerHref) ?? undefined)
+                : undefined;
               // IDENTICAL thumbnail hardening to 500px as in search card
               const thumbSrc = useMemo(
                 () => (displaySrc ? (buildSizedUrl(displaySrc, 500) ?? displaySrc) : undefined),
@@ -245,24 +250,30 @@ export default function GalleryPage() {
                     <dl className="art-card__meta">
                       <dt className="visually-hidden">Artist</dt>
                       <dd className="art-card__artist">{a.artist || 'Unknown artist'}</dd>
-
                       {a.date && (
                         <>
                           <dt className="visually-hidden">Date</dt>
                           <dd className="art-card__date">{a.date}</dd>
                         </>
                       )}
-
-                      {providerHref && (
+                      {safeProviderHref && (
                         <>
                           <dt className="visually-hidden">Institution</dt>
                           <dd className="art-card__institution">
-                            <a href={providerHref} target="_blank" rel="noreferrer">
+                            <a
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                // Open the sanitised provider URL in a new tab with appropriate flags
+                                window.open(safeProviderHref, '_blank', 'noopener,noreferrer');
+                              }}
+                              rel="noreferrer"
+                            >
                               Courtesy of {a.institution || 'the provider'}
-                            </a>
+                            </a>{' '}
                           </dd>
                         </>
-                      )}
+                      )}{' '}
                     </dl>
                   </article>
                 </li>
@@ -297,7 +308,9 @@ export default function GalleryPage() {
             const modalImageSrc = buildSizedUrl(modalBaseUrl, requestedWidth);
             const titleText = selected.title || 'Untitled';
             const providerHref: string | undefined = selected.objectUrl ?? undefined;
-
+            const safeProviderHref: string | undefined = providerHref
+              ? (toSafeHttpUrl(providerHref) ?? undefined)
+              : undefined;
             return (
               <>
                 {/* Image (separate high-res request), never a link */}
@@ -330,13 +343,21 @@ export default function GalleryPage() {
 
                 {/* Source link + Add to Gallery (sequential modals) */}
                 <ul>
-                  {providerHref && (
+                  {safeProviderHref && (
                     <li className="artwork-object_url">
-                      <a href={providerHref} target="_blank" rel="noopener noreferrer">
+                      {/* Keep the element an <a> for semantics, but don’t put the dynamic URL in href */}
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.open(safeProviderHref, '_blank', 'noopener,noreferrer');
+                        }}
+                        rel="noopener noreferrer"
+                      >
                         Source Link
                       </a>
                     </li>
-                  )}
+                  )}{' '}
                   <li>
                     <button
                       ref={addBtnRef}

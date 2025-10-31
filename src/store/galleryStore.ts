@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { logError, AppError } from '../utils/errorLogger';
 import type { Artwork } from '../types/artwork';
+import { toSafeHttpUrl } from '../utils/sanitiseHtml';
 
 export interface Gallery {
   id: string;
@@ -106,32 +107,33 @@ export function useGalleryStore() {
       return gallery;
     }
 
-    function addArtworkToGallery(galleryId: string, art: Artwork): void {
+    function addArtworkToGallery(galleryId: string, art: Artwork) {
+      const sanitisedArt = {
+        ...art,
+        objectUrl: art.objectUrl ? toSafeHttpUrl(art.objectUrl) : null,
+      };
       setGalleries((prev) =>
         prev.map((g) => {
           if (g.id !== galleryId) return g;
-
-          const exists = g.artworks.some((a) => a.id === art.id);
-          if (exists) return g;
-
-          return { ...g, artworks: [...g.artworks, art] };
+          const exists = g.artworks.some((a) => a.id === sanitisedArt.id);
+          return exists ? g : { ...g, artworks: [...g.artworks, sanitisedArt] };
         })
       );
     }
 
-    function addArtworkToGalleries(galleryIds: string[], art: Artwork): void {
+    function addArtworkToGalleries(galleryIds: string[], art: Artwork) {
+      const sanitisedArt = {
+        ...art,
+        objectUrl: art.objectUrl ? toSafeHttpUrl(art.objectUrl) : null,
+      };
       setGalleries((prev) =>
         prev.map((g) => {
           if (!galleryIds.includes(g.id)) return g;
-
-          const exists = g.artworks.some((a) => a.id === art.id);
-          if (exists) return g;
-
-          return { ...g, artworks: [...g.artworks, art] };
+          const exists = g.artworks.some((a) => a.id === sanitisedArt.id);
+          return exists ? g : { ...g, artworks: [...g.artworks, sanitisedArt] };
         })
       );
     }
-
     function getGallery(id: string): Gallery | undefined {
       return galleries.find((g) => g.id === id);
     }
