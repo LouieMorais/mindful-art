@@ -207,6 +207,10 @@ export default function GalleryPage() {
 
               const titleText = a.title || 'Untitled';
 
+              // --------------------- NO-IMAGE FILTER (only change) ---------------------
+              if (!canDisplay) return null;
+              // ------------------------------------------------------------------------
+
               return (
                 <li key={a.id}>
                   <article data-artworkcard-context="gallery" className="art-card__gallery">
@@ -225,16 +229,6 @@ export default function GalleryPage() {
                         <span className="art-card__noimage__label" aria-hidden="true">
                           No image available
                         </span>
-                        {providerHref && (
-                          <a
-                            className="art-card__noimage__provider"
-                            href={providerHref}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View on provider
-                          </a>
-                        )}
                       </div>
                     )}
 
