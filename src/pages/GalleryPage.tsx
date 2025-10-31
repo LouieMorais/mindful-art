@@ -192,15 +192,7 @@ export default function GalleryPage() {
         </section>
       ) : (
         <section aria-label="Artworks">
-          <ul
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1rem',
-              listStyle: 'none',
-              padding: 0,
-            }}
-          >
+          <ul>
             {gallery.artworks.map((a) => {
               // Keep your original card structure; only add the exact same open behaviour as search
               const canDisplay = hasDisplayImage(a);
@@ -224,18 +216,12 @@ export default function GalleryPage() {
                           src={thumbSrc!}
                           alt={titleText}
                           width={500} // retain your 500px convention
-                          style={{ height: 'auto' }}
                           loading="lazy"
                           decoding="async"
                         />
                       </a>
                     ) : (
-                      <div
-                        className="art-card__noimage"
-                        role="img"
-                        aria-label="No image available"
-                        style={{ width: 240, height: 240 }}
-                      >
+                      <div className="art-card__noimage" role="img" aria-label="No image available">
                         <span className="art-card__noimage__label" aria-hidden="true">
                           No image available
                         </span>
@@ -328,7 +314,6 @@ export default function GalleryPage() {
                     alt={`${titleText} — ${selected.artist || 'Unknown'}`}
                     width={requestedWidth}
                     decoding="async"
-                    style={{ width: '100%', height: 'auto', display: 'block' }}
                     sizes="100vw"
                   />
                 )}
