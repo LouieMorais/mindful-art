@@ -9,7 +9,7 @@
 
 Design is representative of future releases, not current MVP:
 
-![Gallery Page](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3.2.3.3.b.%20User%20Area%20-%20Gallery%20Page%20-%20With%20Artworks.png?raw=true)
+![Gallery Page](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-3-3-b-User-Area-Gallery-Page-With-Artworks.png?raw=true)
 
 ---
 
@@ -723,5 +723,3 @@ Only after completion of this sequence may a release be tagged as stable and rec
 - [Museum API - Harvard Art Museums.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Museum%20API%20-%20Harvard%20Art%20Museums.md)
 - [Museum API - Rijksmuseum.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Museum%20API%20-%20Rijksmuseum.md)
 - [Museum API - Europeana.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Museum%20API%20-%20Europeana.md)
-
-
