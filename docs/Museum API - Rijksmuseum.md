@@ -1,4 +1,4 @@
-![](https://i.ibb.co/PskKYv93/mindful-art-topmastb-w.png)
+![](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/mindful-art-topmastb-w.png)
 
 # Rijksmuseum — Integration Manual
 

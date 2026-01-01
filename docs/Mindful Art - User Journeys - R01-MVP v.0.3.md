@@ -1,4 +1,4 @@
-![](https://i.ibb.co/PskKYv93/mindful-art-topmastb-w.png)
+![](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/mindful-art-topmastb-w.png)
 
 # Mindful Art - User Journeys - Release 01 (MVP)
 
@@ -99,16 +99,16 @@ Landing Page
 
 **_Step 1: Choose Login Provider_**
 
-![3-2-1-1-a-Registration-Step-001-Choose-Auth-Provider.png](https://i.ibb.co/jPVVyRwp/3-2-1-1-a-Registration-Step-001-Choose-Auth-Provider.png)
+![3-2-1-1-a-Registration-Step-001-Choose-Auth-Provider.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-1-1-a-Registration-Step-001-Choose-Auth-Provider.png)
 
-![](https://i.ibb.co/3ybTFRKN/3-2-1-1-b-Registration-Step-002-Auth-Provider-Back-Process.png)
+![](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-1-1-b-Registration-Step-002-Auth-Provider-Back-Process.png)
 
 - Google
 - Apple
 
 **_Step 2: Your Information_**
 
-![](https://i.ibb.co/ynrrXCvS/3-2-1-1-c-Registration-Step-003-Username-and-Geolinguistic-Info.png)
+![](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-1-1-c-Registration-Step-003-Username-and-Geolinguistic-Info.png)
 
 - Username
 - Country of Residence
@@ -126,7 +126,7 @@ Landing Page
 
 **_Step 1: Choose Login Provider_**
 
-![3-2-1-1-d-Login.png](https://i.ibb.co/rGZ86Qpj/3-2-1-1-d-Login.png)
+![3-2-1-1-d-Login.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-1-1-d-Login.png)
 
 - Google
 - Apple
@@ -151,7 +151,7 @@ Landing Page
 
 ##### 3.2.2.1. Search Screen on Load
 
-![3-2-2-1-Search-Default-On-Load.png](https://i.ibb.co/Nfh51f0/3-2-2-1-Search-Default-On-Load.png)
+![3-2-2-1-Search-Default-On-Load.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-2-1-Search-Default-On-Load.png)
 
 1. **Search Form**
 
@@ -167,9 +167,9 @@ Landing Page
 
 ##### 3.2.2.2. Search - With Results
 
-![3-2-2-2-a-Search-Results.png](https://i.ibb.co/wr0Gjv2M/3-2-2-2-a-Search-Results.png)
+![3-2-2-2-a-Search-Results.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-2-2-a-Search-Results.png)
 
-![3-2-2-2-b-Search-Results-Vault-Strap.png](https://i.ibb.co/1FLs162/3-2-2-2-b-Search-Results-Vault-Strap.png)
+![3-2-2-2-b-Search-Results-Vault-Strap.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-2-2-b-Search-Results-Vault-Strap.png)
 
 1. **Search Form**
 
@@ -198,7 +198,7 @@ Landing Page
 
 ##### 3.2.2.3. Search - No Results
 
-![3-2-2-3-Search-No-Results.png](https://i.ibb.co/KpZt0s2L/3-2-2-3-Search-No-Results.png)
+![3-2-2-3-Search-No-Results.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-2-3-Search-No-Results.png)
 
 1. **Search Form**
 
@@ -231,7 +231,7 @@ All galleries and vault are accessed from the user area. The Profile Area has 3 
 
 ##### 3.2.3.1. User Area / Your Profile
 
-![3-2-3-1-User-Area-Your-Profile.png](https://i.ibb.co/tMGM9LK1/3-2-3-1-User-Area-Your-Profile.png)
+![3-2-3-1-User-Area-Your-Profile.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-3-1-User-Area-Your-Profile.png)
 
 Displays all information provided in registration as read-only:
 
@@ -251,9 +251,9 @@ Displays all information provided in registration as read-only:
 
 ##### 3.2.3.2. User Area / Your Galleries
 
-![3-2-3-2-a-User-Area-Your-Galleries-No-Gallery.png](https://i.ibb.co/23gzG6ky/3-2-3-2-a-User-Area-Your-Galleries-No-Gallery.png)
+![3-2-3-2-a-User-Area-Your-Galleries-No-Gallery.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-3-2-a-User-Area-Your-Galleries-No-Gallery.png)
 
-![3-2-3-2-b-User-Area-Your-Galleries-With-Galleries.png](https://i.ibb.co/twssDHZc/3-2-3-2-b-User-Area-Your-Galleries-With-Galleries.png)
+![3-2-3-2-b-User-Area-Your-Galleries-With-Galleries.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-3-2-b-User-Area-Your-Galleries-With-Galleries.png)
 
 - a. Create a Gallery CTA
 - b. Lists galleries as "**_Gallery Straps_**" ([3.2.5.2. Gallery Straps](#3252-gallery-straps)), alphabetically stacked, each strap contains:
@@ -268,7 +268,7 @@ Displays all information provided in registration as read-only:
 
 ##### 3.2.3.3. User Area / Your Galleries / Gallery Page
 
-![3-2-3-3-b-User-Area-Gallery-Page-With-Artworks.png](https://i.ibb.co/jvKnCwbm/3-2-3-3-b-User-Area-Gallery-Page-With-Artworks.png)
+![3-2-3-3-b-User-Area-Gallery-Page-With-Artworks.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-3-3-b-User-Area-Gallery-Page-With-Artworks.png)
 
 - a. Link back to Your Galleries
 - Gallery name as chosen by curator when gallery was created - Gallery names must be unique per curator, meaning that the same curator is not allowed to have two or more galleries sharing the exact same name. Two curators can have galleries sharing the same name.
@@ -290,7 +290,7 @@ Displays all information provided in registration as read-only:
 
 ##### 3.2.3.4. User Area / Your Art Vault
 
-![3-2-3-4-b-User-Area-Your-Art-Vault-Page-With-Artwork.png](https://i.ibb.co/9H28YV0q/3-2-3-4-b-User-Area-Your-Art-Vault-Page-With-Artwork.png)
+![3-2-3-4-b-User-Area-Your-Art-Vault-Page-With-Artwork.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-3-4-b-User-Area-Your-Art-Vault-Page-With-Artwork.png)
 
 - Please be reminded that the Art Vault is not a gallery but a storage area for later viewing and works independently from galleries, as such:
   - Cards removed from the Vault (page or strap) do not get removed from any galleries.
@@ -368,7 +368,7 @@ Straps work as stand-alone tasters of galleries hosting Artwork Cards or, as in 
 
 ##### 3.2.5.1. Vault Strap
 
-![3-2-5-1-Vault-Strap.png](https://i.ibb.co/YFYchDCv/3-2-5-1-Vault-Strap.png)
+![3-2-5-1-Vault-Strap.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-5-1-Vault-Strap.png)
 
 - Appears in the search/search results page whenever an Artwork Search Card is saved from the search results to the Art Vault.
 - The Vault Strap lists Artwork Vault Strap Cards by order of last saved in the Vault first.
@@ -391,7 +391,7 @@ Straps work as stand-alone tasters of galleries hosting Artwork Cards or, as in 
 
 ##### 3.2.5.2. Gallery Straps
 
-![3-2-5-2-Gallery-Straps.png](https://i.ibb.co/1fCjQ3Vm/3-2-5-2-Gallery-Straps.png)
+![3-2-5-2-Gallery-Straps.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-5-2-Gallery-Straps.png)
 
 - Appears in Your Galleries page - providing a taster of the galleries curated by users.
 - The Gallery Strap lists Artwork Gallery Strap Cards strictly mirroring the artwork order in the individual gallery it is linked to:
@@ -444,7 +444,7 @@ There are five types of Artwork Cards:
 
 ##### 3.2.6.1. Artwork Search Card
 
-![3-2-6-1-Artwork-Search-Card.png](https://i.ibb.co/XxS3CTWY/3-2-6-1-Artwork-Search-Card.png)
+![3-2-6-1-Artwork-Search-Card.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-6-1-Artwork-Search-Card.png)
 
 Appears as items in the search/search results page.
 
@@ -459,7 +459,7 @@ Appears as items in the search/search results page.
 
 ##### 3.2.6.2. Artwork Vault Strap Card
 
-![3-2-6-2-Artwork-Vault-Strap-Card.png](https://i.ibb.co/5wXQCRJ/3-2-6-2-Artwork-Vault-Strap-Card.png)
+![3-2-6-2-Artwork-Vault-Strap-Card.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-6-2-Artwork-Vault-Strap-Card.png)
 
 Appears as items inside the Vault Strap in the search page. Please be reminded that the Art Vault is not a gallery but a storage area and works independently from galleries, as such:
 
@@ -482,7 +482,7 @@ Appears as items inside the Vault Strap in the search page. Please be reminded t
 
 ##### 3.2.6.3. Artwork Vault Card
 
-![3-2-6-3-Artwork-Vault-Card.png](https://i.ibb.co/4ndV9Y8P/3-2-6-3-Artwork-Vault-Card.png)
+![3-2-6-3-Artwork-Vault-Card.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-6-3-Artwork-Vault-Card.png)
 
 - Please be reminded that the Art Vault is not a gallery but a storage area and works independently from galleries, as such:
   - Cards removed from the Vault (page or strap) do not get removed from any galleries.
@@ -508,7 +508,7 @@ Appears as items inside the Vault Strap in the search page. Please be reminded t
 
 ##### 3.2.6.4. Artwork Gallery Strap Card
 
-![3-2-6-4-Artwork-Gallery-Strap-Card.png](https://i.ibb.co/QjYjmf1w/3-2-6-4-Artwork-Gallery-Strap-Card.png)
+![3-2-6-4-Artwork-Gallery-Strap-Card.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-6-4-Artwork-Gallery-Strap-Card.png)
 
 Appears as ordered items inside the Gallery Straps in Your Galleries page.
 
@@ -523,7 +523,7 @@ Appears as ordered items inside the Gallery Straps in Your Galleries page.
 
 ##### 3.2.6.5. Artwork Gallery Card
 
-![3-2-6-5-Artwork-Gallery-Card.png](https://i.ibb.co/TDzsx3xd/3-2-6-5-Artwork-Gallery-Card.png)
+![3-2-6-5-Artwork-Gallery-Card.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-6-5-Artwork-Gallery-Card.png)
 
 Appears as ordered items in the gallery pages:
 
@@ -614,7 +614,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 1. **3.2.7.1.a Create _First_ Gallery screen**
 
-![3-2-7-1-a-Create-Gallery-Actions-Menu-First-Gallery-Ever.png](https://i.ibb.co/N65m1vpK/3-2-7-1-a-Create-Gallery-Actions-Menu-First-Gallery-Ever.png)
+![3-2-7-1-a-Create-Gallery-Actions-Menu-First-Gallery-Ever.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-1-a-Create-Gallery-Actions-Menu-First-Gallery-Ever.png)
 
 - Artwork
   - Thumbnail
@@ -628,7 +628,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 2. **3.2.7.1.b and 3.2.7.2.b Artwork Added Success screen**
 
-![3-2-7-1-b-and-3-2-7-2-b-Create-Gallery-Artwork-Added-Success.png](https://i.ibb.co/qZ3Lq8K/3-2-7-1-b-and-3-2-7-2-b-Create-Gallery-Artwork-Added-Success.png)
+![3-2-7-1-b-and-3-2-7-2-b-Create-Gallery-Artwork-Added-Success.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-1-b-and-3-2-7-2-b-Create-Gallery-Artwork-Added-Success.png)
 
 - Artwork added confirmation
   - Thumbnail
@@ -643,7 +643,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 3. **3.2.7.1.b and 3.2.7.2.b Artwork Not Added Success screen**
 
-![3-2-7-1-c-and-3-2-7-2-c-Create-Gallery-Artwork-NOT-Added-Success.png](https://i.ibb.co/nMHYwK63/3-2-7-1-c-and-3-2-7-2-c-Create-Gallery-Artwork-NOT-Added-Success.png)
+![3-2-7-1-c-and-3-2-7-2-c-Create-Gallery-Artwork-NOT-Added-Success.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-1-c-and-3-2-7-2-c-Create-Gallery-Artwork-NOT-Added-Success.png)
 
 - Artwork not added confirmation
   - Thumbnail
@@ -661,7 +661,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 1. **3.2.7.2.a Create _New_ Gallery screen**
 
-![3-2-7-2-a-Create-Gallery-Actions-Menu-Other-Galleries-Exist.png](https://i.ibb.co/Ld39BFYT/3-2-7-2-a-Create-Gallery-Actions-Menu-Other-Galleries-Exist.png)
+![3-2-7-2-a-Create-Gallery-Actions-Menu-Other-Galleries-Exist.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-2-a-Create-Gallery-Actions-Menu-Other-Galleries-Exist.png)
 
 - Artwork
   - Thumbnail
@@ -675,7 +675,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 2. **3.2.7.1.b and 3.2.7.2.b Artwork Added Success screen**
 
-![3-2-7-1-b-and-3-2-7-2-b-Create-Gallery-Artwork-Added-Success.png](https://i.ibb.co/qZ3Lq8K/3-2-7-1-b-and-3-2-7-2-b-Create-Gallery-Artwork-Added-Success.png)
+![3-2-7-1-b-and-3-2-7-2-b-Create-Gallery-Artwork-Added-Success.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-1-b-and-3-2-7-2-b-Create-Gallery-Artwork-Added-Success.png)
 
 - Artwork added confirmation
   - Thumbnail
@@ -689,7 +689,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 3. **3.2.7.1.c and 3.2.7.2.c Artwork Not Added Success screen**
 
-![3-2-7-1-c-and-3-2-7-2-c-Create-Gallery-Artwork-NOT-Added-Success.png](https://i.ibb.co/nMHYwK63/3-2-7-1-c-and-3-2-7-2-c-Create-Gallery-Artwork-NOT-Added-Success.png)
+![3-2-7-1-c-and-3-2-7-2-c-Create-Gallery-Artwork-NOT-Added-Success.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-1-c-and-3-2-7-2-c-Create-Gallery-Artwork-NOT-Added-Success.png)
 
 - Artwork not added confirmation
   - Thumbnail
@@ -707,7 +707,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 1. **3.2.7.3.a. Create _First_ Gallery screen**
 
-![3-2-7-3-a-Create-Gallery-Gallery-CTA-First-Gallery-Ever.png](https://i.ibb.co/7J3dvbPg/3-2-7-3-a-Create-Gallery-Gallery-CTA-First-Gallery-Ever.png)
+![3-2-7-3-a-Create-Gallery-Gallery-CTA-First-Gallery-Ever.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-3-a-Create-Gallery-Gallery-CTA-First-Gallery-Ever.png)
 
 - No artwork to be shown
 - Gallery Title (40 Characters) - Gallery names must be unique per curator, meaning that the same curator is not allowed to have two or more galleries sharing the exact same name. Two different curators can have galleries sharing the same name.
@@ -715,7 +715,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 2. **3.2.7.3.b. and 3.2.7.4.b. Success screen**
 
-![3-2-7-3-b-and-3-2-7-4-b-Create-Gallery-Gallery-CTA-Success.png](https://i.ibb.co/HDCFqtYg/3-2-7-3-b-and-3-2-7-4-b-Create-Gallery-Gallery-CTA-Success.png)
+![3-2-7-3-b-and-3-2-7-4-b-Create-Gallery-Gallery-CTA-Success.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-3-b-and-3-2-7-4-b-Create-Gallery-Gallery-CTA-Success.png)
 
 - No artwork to be shown
 - Link to newly created gallery - date and time of creation
@@ -729,7 +729,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 1. **3.2.7.4.a. Create _New_ Gallery screen**
 
-![3-2-7-4-a-Create-Gallery-Gallery-CTA-Other-Galleries-Exist.png](https://i.ibb.co/cXY8pp24/3-2-7-4-a-Create-Gallery-Gallery-CTA-Other-Galleries-Exist.png)
+![3-2-7-4-a-Create-Gallery-Gallery-CTA-Other-Galleries-Exist.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-4-a-Create-Gallery-Gallery-CTA-Other-Galleries-Exist.png)
 
 - No artwork to be shown
 - Gallery Title (40 Characters) - Gallery names must be unique per curator, meaning that the same curator is not allowed to have two or more galleries sharing the exact same name. Two different curators can have galleries sharing the same name.
@@ -737,7 +737,7 @@ In Mindful Art, users can create galleries from several CTAs present throughout 
 
 2. **3.2.7.3.b. and 3.2.7.4.b. Success screen**
 
-![3-2-7-3-b-and-3-2-7-4-b-Create-Gallery-Gallery-CTA-Success.png](https://i.ibb.co/HDCFqtYg/3-2-7-3-b-and-3-2-7-4-b-Create-Gallery-Gallery-CTA-Success.png)
+![3-2-7-3-b-and-3-2-7-4-b-Create-Gallery-Gallery-CTA-Success.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-7-3-b-and-3-2-7-4-b-Create-Gallery-Gallery-CTA-Success.png)
 
 - No artwork to be shown
 - Link to newly created gallery - date and time of creation
@@ -761,7 +761,7 @@ In Mindful Art, users can save artwork to galleries mainly from the More Actions
 
 1. **3.2.8.1.a. Save Artwork and Create _First_ Gallery screen**
 
-![3-2-8-1-a-Save-to-Gallery-Actions-Menu-First-Gallery-Ever.png](https://i.ibb.co/gMV1rQG0/3-2-8-1-a-Save-to-Gallery-Actions-Menu-First-Gallery-Ever.png)
+![3-2-8-1-a-Save-to-Gallery-Actions-Menu-First-Gallery-Ever.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-8-1-a-Save-to-Gallery-Actions-Menu-First-Gallery-Ever.png)
 
 - Artwork
   - Thumbnail
@@ -774,7 +774,7 @@ In Mindful Art, users can save artwork to galleries mainly from the More Actions
 
 2. **3.2.8.1.b. Success screen**
 
-![3-2-8-1-b-Save-to-Gallery-Artwork-Added-Success.png](https://i.ibb.co/wFSngrfx/3-2-8-1-b-Save-to-Gallery-Artwork-Added-Success.png)
+![3-2-8-1-b-Save-to-Gallery-Artwork-Added-Success.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-8-1-b-Save-to-Gallery-Artwork-Added-Success.png)
 
 - Artwork added confirmation
   - Thumbnail
@@ -794,9 +794,9 @@ In Mindful Art, users can save artwork to galleries mainly from the More Actions
 
 1. **3.2.8.2.a. and 3.2.8.2.b. Choose a Gallery to Save Artwork screen**
 
-![3-2-8-2-a-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist.png](https://i.ibb.co/TxTXmxrk/3-2-8-2-a-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist.png)
+![3-2-8-2-a-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-8-2-a-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist.png)
 
-![3-2-8-2-b-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist-Create-a-New-Gallery.png](https://i.ibb.co/9kH0NV3w/3-2-8-2-b-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist-Create-a-New-Gallery.png)
+![3-2-8-2-b-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist-Create-a-New-Gallery.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-8-2-b-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist-Create-a-New-Gallery.png)
 
 - Artwork
   - Thumbnail
@@ -811,7 +811,7 @@ In Mindful Art, users can save artwork to galleries mainly from the More Actions
 
 2. **3.2.8.2.c. Success screen**
 
-![3-2-8-2-c-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist-Success.png](https://i.ibb.co/XxKKm9Bb/3-2-8-2-c-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist-Success.png)
+![3-2-8-2-c-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist-Success.png](https://github.com/LouieMorais/mindful-art/blob/main/docs/wireframes/r01/3-2-8-2-c-Save-to-Gallery-Actions-Menu-Other-Galleries-Exist-Success.png)
 
 - Artwork
   - Thumbnail
