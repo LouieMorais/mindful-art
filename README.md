@@ -718,3 +718,5 @@ Only after completion of this sequence may a release be tagged as stable and rec
 ---
 
 ## 11. Release 01 Documentation
+
+[Mindful Art - User Journeys - R01-MVP v.0.3.md](docs/Mindful Art - User Journeys - R01-MVP v.0.3.md)
