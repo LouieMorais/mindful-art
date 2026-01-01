@@ -718,3 +718,10 @@ Only after completion of this sequence may a release be tagged as stable and rec
 ---
 
 ## 11. Release 01 Documentation
+
+- [Mindful Art - User Journeys - R01-MVP v.0.3.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Mindful%20Art%20-%20User%20Journeys%20-%20R01-MVP%20v.0.3.md)
+- [Museum API - Harvard Art Museums.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Museum%20API%20-%20Harvard%20Art%20Museums.md)
+- [Museum API - Rijksmuseum.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Museum%20API%20-%20Rijksmuseum.md)
+- [Museum API - Europeana.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Museum%20API%20-%20Europeana.md)
+
+
