@@ -842,6 +842,11 @@ In Mindful Art, users can save artwork to galleries mainly from the More Actions
 
 ## 5. Release 01 Documentation
 
+- [Mindful Art - User Journeys - R01-MVP v.0.3.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Mindful%20Art%20-%20User%20Journeys%20-%20R01-MVP%20v.0.3.md)
+- [Museum API - Harvard Art Museums.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Museum%20API%20-%20Harvard%20Art%20Museums.md)
+- [Museum API - Rijksmuseum.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Museum%20API%20-%20Rijksmuseum.md)
+- [Museum API - Europeana.md](https://github.com/LouieMorais/mindful-art/blob/main/docs/Museum%20API%20-%20Europeana.md)
+
 <a href="#mindful-art---project-initiation-document---release-01-mvp" style="float: right; font-size: 0.8em; display: block; padding: 10px 0;  clear: both">**[BACK TO INDEX]**</a>
 
 ---
