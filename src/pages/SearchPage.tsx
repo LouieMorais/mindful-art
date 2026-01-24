@@ -41,7 +41,10 @@ export default function SearchPage() {
   return (
     <main className="artsearchform">
       <h1>Search Artworks</h1>
-      <p>Please note that the APIs to the museums have changed since development, causing the results to break. Apologies, I am working on a solution. </p>
+      <p role="alert">
+        Please note that the APIs to the museums have changed since development, causing the results
+        to break. Apologies, I am working on a solution.{' '}
+      </p>
       <SearchForm
         onSearch={(q) => {
           void handleSearch(q);
