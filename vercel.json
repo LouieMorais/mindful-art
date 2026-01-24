@@ -1,7 +1,16 @@
 {
   "trailingSlash": false,
   "redirects": [{ "source": "/:path+/", "destination": "/:path+", "permanent": true }],
-  "rewrites": [{ "source": "/((?!api|.*\\..*).*)", "destination": "/index.html" }],
+  "rewrites": [
+    {
+      "source": "/api/rijks/:path*",
+      "destination": "https://www.rijksmuseum.nl/api/en/:path*"
+    },
+    {
+      "source": "/((?!api|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
