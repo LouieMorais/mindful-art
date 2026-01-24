@@ -3,8 +3,8 @@
   "redirects": [{ "source": "/:path+/", "destination": "/:path+", "permanent": true }],
   "rewrites": [
     {
-      "source": "/api/rijks/:path*",
-      "destination": "https://www.rijksmuseum.nl/api/en/:path*"
+      "source": "/api/rijks/collection",
+      "destination": "https://www.rijksmuseum.nl/api/en/collection"
     },
     {
       "source": "/((?!api|.*\\..*).*)",

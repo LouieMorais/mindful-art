@@ -75,14 +75,20 @@ export async function searchHarvard(
 
     // IIIF-first selection
     const iiif = r.images?.find((i) => i?.iiifbaseuri)?.iiifbaseuri?.replace(/\/$/, '') ?? null;
-    const base = r.images?.find((i) => i?.baseimageurl)?.baseimageurl ?? null;
-    const primary = r.primaryimageurl ?? null;
+
+    // Force HTTPS to prevent mixed content errors
+    let base = r.images?.find((i) => i?.baseimageurl)?.baseimageurl ?? null;
+    if (base) base = base.replace(/^http:\/\//, 'https://');
+
+    let primary = r.primaryimageurl ?? null;
+    if (primary) primary = primary.replace(/^http:\/\//, 'https://');
 
     // Derive URLs with IIIF preference and safe fallbacks
     const thumbnailUrl = toSafeHttpUrl(
       iiif ? `${iiif}/full/500,/0/default.jpg` : (base ?? primary)
     );
     const imageUrl = toSafeHttpUrl(primary ?? (iiif ? `${iiif}/full/1200,/0/default.jpg` : base));
+
     const objectUrl = toSafeHttpUrl(r.url ?? null);
 
     return {

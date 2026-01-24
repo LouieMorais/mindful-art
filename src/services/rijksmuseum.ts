@@ -88,9 +88,9 @@ export async function searchRijksmuseum(
 
   // Spike behaviour: English endpoint, imgonly=true, page size (ps)
   const q = encodeURIComponent(query);
-// Use the relative path defined in vercel.json
-const baseUrl = '/api/rijks/collection'; 
-const url = `${baseUrl}?key=${RIJKS_KEY}&q=${q}&imgonly=true&ps=${limit}`;
+  // Use Vercel proxy path defined in vercel.json
+  const url = `/api/rijks/collection?key=${RIJKS_KEY}` + `&q=${q}&imgonly=true&ps=${limit}`;
+
   const res = await fetch(url);
   if (!res.ok) return { items: [], warning: `Rijksmuseum HTTP ${res.status}` };
 
