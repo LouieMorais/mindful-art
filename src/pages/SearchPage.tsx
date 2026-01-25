@@ -42,8 +42,8 @@ export default function SearchPage() {
     <main className="artsearchform">
       <h1>Search Artworks</h1>
       <p role="alert">
-        Please note that the APIs to the museums have changed since development, causing the results
-        to break. Apologies, I am working on a solution.{' '}
+        Due to changes in some museums APIs, results are being sourced from less institutions. I am
+        working on a solution.{' '}
       </p>
       <SearchForm
         onSearch={(q) => {

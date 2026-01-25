@@ -34,5 +34,6 @@
     "vercel",
     "vite",
     "wireframes"
-  ]
+  ],
+  "snyk.advanced.autoSelectOrganization": true
 }
